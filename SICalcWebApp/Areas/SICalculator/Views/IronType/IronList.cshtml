@@ -1,0 +1,42 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.SICalculator.Models.IronType>
+
+@{
+    ViewData["Title"] = "IronList";
+}
+
+<h1>Master List For IronType</h1>
+
+<p>
+    <a asp-action="CreateIron">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.IronTypeName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.IronTypeName)
+            </td>
+            <td>
+                    <a asp-action="EditIron" asp-route-id="@item.Id">Edit</a> |
+
+
+
+
+                    <form asp-action="DeleteIron" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

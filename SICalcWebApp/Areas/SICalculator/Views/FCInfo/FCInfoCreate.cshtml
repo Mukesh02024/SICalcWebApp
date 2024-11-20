@@ -1,0 +1,168 @@
+﻿
+@model SICalcWebApp.Areas.SICalculator.Models.FCInfo
+
+@{
+    ViewData["Title"] = "FCInfoCreate";
+}
+
+<h1>FCInfoCreate</h1>
+
+<h4>FCInfo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="fcInfoForm" asp-action="FCInfoCreate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- TPD Dropdown -->
+            <div class="form-group">
+                <label asp-for="TPDId" class="control-label"></label>
+                <select id="tpdDropdown" asp-for="TPDId" class="form-control">
+                    <option value="">Select Klin</option>
+                    @foreach (var tpd in ViewBag.TPDId as SelectList)
+                    {
+                        <option value="@tpd.Value">@tpd.Text</option>
+                    }
+                </select>
+            </div>
+
+            <!-- FC Dropdown -->
+            <div class="form-group">
+                <label asp-for="FCId" class="control-label"></label>
+                <select id="fcDropdown" asp-for="FCId" class="form-control">
+                    <option value="">Select FC</option>
+                </select>
+                <span asp-validation-for="FCId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="FeedRate" class="control-label"></label>
+                <input asp-for="FeedRate" class="form-control" />
+                <span asp-validation-for="FeedRate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="FCInfoList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+
+
+
+        $(document).ready(function () {
+            $('#tpdDropdown').change(function () {
+                var tpdId = $(this).val();
+                $.ajax({
+                    url: '@Url.Action("GetFCsByTPD", "FCInfo")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { tpdId: tpdId },
+                    success: function (data) {
+                        var fcDropdown = $('#fcDropdown');
+                        fcDropdown.empty();
+                        fcDropdown.append('<option value="">Select FC</option>');
+                        $.each(data, function (index, item) {
+                            fcDropdown.append('<option value="' + item.value + '">' + item.text + '</option>');
+                        });
+                    },
+                    error: function () {
+                        console.log("An error occurred while retrieving FCs.");
+                    }
+                });
+            });
+        })
+
+
+
+
+
+
+
+
+        // $(document).ready(function () {
+        //     $('#tpdDropdown').change(function () {
+        //         var tpdId = $(this).val();
+        //         $.ajax({
+        //             url: '@Url.Action("GetFCsByTPD", "FCInfo")',
+        //             type: 'POST',
+        //             dataType: 'json',
+        //             data: { tpdId: tpdId },
+        //             success: function (data) {
+        //                 var fcDropdown = $('#fcDropdown');
+        //                 fcDropdown.empty();
+        //                 fcDropdown.append('<option value="">Select FC</option>');
+        //                 $.each(data, function (index, item) {
+        //                     fcDropdown.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+        //                 });
+        //             }
+        //         });
+        //     });
+        // });
+    </script>
+}
+
+
+
+
+
+
+
+
+@* 
+
+
+@model SICalcWebApp.Areas.SICalculator.Models.FCInfo
+
+@{
+    ViewData["Title"] = "FCInfoCreate";
+}
+
+<h1>FCInfoCreate</h1>
+
+<h4>FCInfo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="FCInfoCreate">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="FCId" class="control-label"></label>
+                <select asp-for="FCId" class="form-control" asp-items="ViewBag.FCId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TPDId" class="control-label"></label>
+                <select asp-for="TPDId" class="form-control" asp-items="ViewBag.TPDId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="FeedRate" class="control-label"></label>
+                <input asp-for="FeedRate" class="form-control" />
+                <span asp-validation-for="FeedRate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="FCInfoList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+} *@

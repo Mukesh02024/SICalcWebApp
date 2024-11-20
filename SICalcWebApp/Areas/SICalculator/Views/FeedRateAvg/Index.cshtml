@@ -1,0 +1,653 @@
+﻿@model SICalcWebApp.Areas.SICalculator.VM.FeedRateViewModel
+
+@{
+    ViewData["Title"] = "Get Average Feed Rate";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+
+
+<style>
+    #tpdList {
+        position: sticky;
+        top: 0; /* Keeps the header fixed at the top of the viewport */
+        z-index: 1; /* Ensures the header stays above other content */
+        background-color: #f8f9fa; /* Matches the background of your form */
+    }
+</style>
+
+<form id="feedRateForm">
+    <div class="form-group">
+        <select id="selectedFC" name="selectedFC" class="form-control">
+            <option value="">-- Select FC --</option>
+            @foreach (var fc in Model.FCs)
+            {
+                <option value="@fc.FCId">@fc.FCValue</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Select Klin</label>
+        <table class="table table-bordered" style="width:fit-content;">
+            <thead>
+                <tr>
+                    <th>Selection</th>
+                    <th>Klin Name</th>
+                    <th>TPD</th>
+                </tr>
+            </thead>
+            <tbody id="tpdList">
+                <!-- TPD checkboxes will be loaded here based on FC selection -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="form-group">
+        <label for="selectedFCValue">Selected FC</label>
+        <input type="text" id="selectedFCValue" name="selectedFCValue" class="form-control" readonly />
+    </div>
+    <!-- Display Feedrate Average -->
+    <div class="form-group">
+        <label for="feedRateAverage">Feedrate Average</label>
+        <input type="text" id="feedRateAverage" name="feedRateAverage" class="form-control" readonly />
+    </div>
+
+
+    <div class="form-group">
+        <label for="selectedTPDCount">Number of Running Klin </label>
+        <input type="text" id="selectedTPDCount" name="selectedTPDCount" class="form-control" readonly />
+    </div>
+
+
+
+    <!-- this section for addd radio buton -->
+    <!-- Step 1: Radio Buttons to Choose Input Mode -->
+    <div class="form-group">
+        <label for="inputMode">Choose Input Mode:</label><br />
+        <!-- Radio button for manual input -->
+      @*   <input type="radio" id="manualInput" name="inputMode" value="manual" /> *@
+@*         <label for="manualInput"> Manual Input Percentages </label><br /> *@
+        <!-- Radio button for automatic combination -->
+        <input type="radio" id="autoGenerate" name="inputMode" value="auto" />
+        <label for="autoGenerate">Select Materials for Auto Generation</label>
+    </div>
+
+
+
+
+
+
+    <!-- Step 2: Manual Input Section -->
+    <div id="manualInputSection" style="margin-top: 20px;">
+    @*     <h3>Input Materials and Percentages</h3> *@
+        <table class="table table-bordered" id="materialTable">
+            <thead>
+                <tr>
+                    <th>Material Name</th>
+                    <th>Usage Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Material rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div id="autoGenerateSection" style="display:none; margin-top: 20px;">
+        <h3>Select Materials for Auto Generation</h3>
+        <table class="table table-bordered" id="autoMaterialTable">
+            <thead>
+                <tr>
+                    <th>Material Name</th>
+                    <th>Select Material</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Material rows will be populated here for auto generation -->
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <div class="form-group">
+        <label for="moisture">Moisture (%)</label>
+        <input type="number" id="moisture" name="moisture" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="CoalCost">Coal Cost</label>
+        <input type="number" id="CoalCost" name="CoalCost" class="form-control" />
+    </div>
+
+
+    <div id="result"></div>
+
+    <button type="button" id="submitMaterialPercentages" class="btn btn-primary">Submit Material Percentages</button>
+
+
+</form>
+
+<div id="result">
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            let costPerFeedRate;
+            // Handle FC selection change event
+            $('#selectedFC').change(function () {
+                var selectedFCId = $(this).val();
+                var selectedFCText = $('#selectedFC option:selected').text();
+                if (selectedFCId) {
+                    $('#selectedFCValue').val(selectedFCText);
+
+                    $.ajax({
+                        url: '@Url.Action("GetTPDsByFC", "FeedRateAvg", new { area = "SICalculator" })',
+                        type: 'GET',
+                        data: { fcId: selectedFCId },
+                        success: function (tpdList) {
+                            var tpdHtml = '';
+                            $.each(tpdList, function (index, tpd) {
+                                tpdHtml += `
+
+                                      <tr>
+                                                                        <td><input class="form-check-input" type="checkbox" value="${tpd.tpdId}" id="tpd_${tpd.TPDId}" name="selectedTPDs" /></td>
+                                                                        <td><label class="form-check-label" for="tpd_${tpd.TPDId}">${tpd.kilnName}</label></td>
+                                                                        <td><label class="form-check-label" for="tpd_${tpd.TPDId}">${tpd.tpd}</label></td>
+                                                                    </tr>`;
+                            });
+                            $('#tpdList').html(tpdHtml);
+                            $('#feedRateAverage').val('0');
+                            $('#selectedTPDCount').val('0');
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error);
+                        }
+                    });
+                } else {
+                    $('#tpdList').empty(); // Clear TPD list if no FC is selected
+                    $('#feedRateAverage').val('0');
+                    $('#selectedFCValue').val(''); // Clear the selected FC textbox
+
+
+                }
+            });
+
+            $(document).on('change', 'input[name="selectedTPDs"]', function () {
+                var selectedTPDs = $("input[name='selectedTPDs']:checked").map(function () {
+                    return $(this).val();
+                }).get();
+
+                $('#selectedTPDCount').val(selectedTPDs.length);
+
+                if (selectedTPDs.length > 0) {
+                    $.ajax({
+                        url: '@Url.Action("GetAverageFeedRate", "FeedRateAvg", new { area = "SICalculator" })',
+                        type: 'POST',
+                        data: { selectedFC: $('#selectedFC').val(), selectedTPDs: selectedTPDs },
+                        success: function (result) {
+                            if (result.error) {
+                                $("#feedRateAverage").val(result.error);
+                            } else {
+                                $("#feedRateAverage").val(result.averageFeedRate);
+
+                                costPerFeedRate = result.costPerFeedRate;
+                                // $("#C_fe").val(result.costPerFeedRate);
+
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            $("#feedRateAverage").val("Error: " + error);
+                        }
+                    });
+                } else {
+                    $("#feedRateAverage").val("");
+                    $("#C_fe").val("");
+                }
+            });
+
+            $('#manualInputSection').hide();
+            $('#autoGenerateSection').hide();
+
+            // Toggle between manual input and auto generation sections
+            $('input[name="inputMode"]').change(function () {
+                if (this.value === 'manual') {
+                    $('#manualInputSection').show();
+                    $('#autoGenerateSection').hide();
+
+                    // Fetch and display materials for manual input
+                    $.ajax({
+                        url: '@Url.Action("GetMaterials", "FeedRateAvg", new { area = "SICalculator" })',
+                        type: 'GET',
+                        success: function (materials) {
+                            var materialHtml = '';
+                            $.each(materials, function (index, material) {
+                                materialHtml += `
+                                        <tr>
+                                            <td>${material.materialName}</td>
+                                            <td><input type="number" name="Materials[${index}].UsagePercentage" class="form-control" /></td>
+                                        </tr>`;
+                            });
+                            $('#materialTable tbody').html(materialHtml);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error);
+                        }
+                    });
+                } else if (this.value === 'auto') {
+                    $('#manualInputSection').hide();
+                    $('#autoGenerateSection').show();
+
+                    // Fetch and display materials for auto generation
+                    $.ajax({
+                        url: '@Url.Action("GetMaterials", "FeedRateAvg", new { area = "SICalculator" })',
+                        type: 'GET',
+                        success: function (materials) {
+                            var autoMaterialHtml = '';
+                            $.each(materials, function (index, material) {
+                                autoMaterialHtml += `
+                                        <tr>
+                                            <td>${material.materialName}</td>
+                                            <td><input type="checkbox" name="SelectedMaterials[${index}]" value="${material.materialName}" /></td>
+                                        </tr>`;
+                            });
+                            $('#autoMaterialTable tbody').html(autoMaterialHtml);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("AJAX error:", error);
+                        }
+                    });
+                }
+            });
+
+
+
+            // Handle form submission
+            $("#feedRateForm").submit(function (event) {
+                event.preventDefault();
+
+                // Debugging: Log the checked TPD checkboxes
+                var checkedTPDs = $("input[name='selectedTPDs']:checked").map(function () {
+                    return $(this).val();
+                }).get();
+                console.log("Checked TPDs before form submission:", checkedTPDs);
+
+                var formData = $(this).serialize();
+                console.log("Serialized form data:", formData);
+
+                $.ajax({
+                    url: '@Url.Action("GetAverageFeedRate", "FeedRateAvg", new { area = "SICalculator" })',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        console.log("AJAX success result:", result);
+
+                        if (result.error) {
+                            $("#result").html(`<p class="text-danger">${result.error}</p>`);
+                        } else {
+                            $("#result").html(`
+                                                                <p>FC: ${result.fc || 'Not Available'}</p>
+                                                                <p>Average Feed Rate: ${result.averageFeedRate || 'Not Available'}</p>
+                                                                <p>C/Fe: ${result.costPerFeedRate || 'Not Available'}</p>
+                                                            `);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#result").html(`<p class="text-danger">An error occurred: ${error}</p>`);
+                    }
+                });
+            });
+
+
+
+
+            $(document).on('input', 'input[name^="Materials"]', function () {
+                validatePercentage();
+            });
+
+            function validatePercentage() {
+                let totalPercentage = 0;
+                let warningDisplayed = false;
+
+                $('input[name^="Materials"]').each(function () {
+                    let value = parseFloat($(this).val()) || 0;
+                    totalPercentage += value;
+                });
+
+                if ($('#manualInputOption').is(':checked')) {
+                    if (totalPercentage > 100 && !warningDisplayed) {
+                        alert('The total percentage cannot exceed 100%. Please adjust your inputs.');
+                        warningDisplayed = true;
+                    } else if (totalPercentage <= 100) {
+                        warningDisplayed = false;
+                    }
+                }
+            }
+
+
+            $("#submitMaterialPercentages").click(function () {
+                let calculatedValue1 = $("#feedRateAverage").val();
+                let calculatedValue2 = $("#selectedTPDCount").val();
+                let calculatedValue3 = costPerFeedRate; // Adjust as necessary
+                let moisture = $("#moisture").val();
+                let coalcost = $("#CoalCost").val();
+                let materials = {};
+                let selectedMaterials = [];
+                let totalPercentage = 0;
+                var Coalused = coalcost;
+
+
+                let isAutoGeneration = $('input[name="inputMode"]:checked').val() === 'auto';
+
+                if (isAutoGeneration) {
+                    // Gather selected materials for auto-generation
+                    $('#autoMaterialTable input:checked').each(function () {
+                        selectedMaterials.push($(this).val());
+                    });
+                } else {
+                    // Gather manual input materials
+                    $('#materialTable tbody tr').each(function () {
+                        let materialName = $(this).find('td:first').text();
+                        let percentage = parseFloat($(this).find('input[type="number"]').val());
+                        if (percentage && percentage > 0) {
+                            materials[materialName] = percentage;
+                            totalPercentage += percentage;
+                        }
+                    });
+
+                    if (totalPercentage !== 100) {
+                        $("#result").html("Error: The total percentage must be exactly 100%.");
+                        return; // Prevent the form from being submitted
+                    }
+                }
+
+
+
+
+
+                $.ajax({
+                    url: '@Url.Action("PerformCalculations", "FeedRateAvg", new { area = "SICalculator" })',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        averageFeedRate: calculatedValue1,
+                        numberOfRunningKilns: calculatedValue2,
+                        cfe: calculatedValue3,
+                        selectedFC: $('#selectedFCValue').val(),
+                        moisture: moisture,
+                        coalcost: coalcost,
+                        materialPercentages: isAutoGeneration ? {} : materials,
+                        IsAutoGeneration: isAutoGeneration,
+                        SelectedMaterials: isAutoGeneration ? selectedMaterials : []
+                    }),
+                    xhrFields: {
+                        responseType: 'blob'  // Important for file download
+                    },
+                    success: function (result, status, xhr) {
+                        var disposition = xhr.getResponseHeader('Content-Disposition');
+                        var filename = disposition ? disposition.split('filename=')[1].trim() : "FeedRateResults.xlsx";
+
+                        var link = document.createElement('a');
+                        var blob = new Blob([result], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX error:", error);
+                        console.log("Full xhr object:", xhr);
+                        $("#result").html("An error occurred while generating the Excel file.");
+                    }
+                });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                // $.ajax({
+                //     url: '@Url.Action("PerformCalculations", "FeedRateAvg", new { area = "SICalculator" })',
+                //     type: 'POST',
+                //     contentType: 'application/json',
+                //     data: JSON.stringify({
+                //         averageFeedRate: calculatedValue1,
+                //         numberOfRunningKilns: calculatedValue2,
+                //         cfe: calculatedValue3,
+                //         selectedFC: $('#selectedFCValue').val(),
+                //         moisture: moisture,
+                //         coalcost: coalcost,
+                //         materialPercentages: isAutoGeneration ? {} : materials,
+                //         timeout: 60000, // 60 seconds
+                //         IsAutoGeneration: isAutoGeneration,
+                //         SelectedMaterials: isAutoGeneration ? selectedMaterials : []
+                //     }),
+                //     success: function (result) {
+                //         // Log the entire result object to inspect its structure
+                //         console.log("AJAX result:", result);
+
+                //         // Log the success property to check if it's true
+                //         console.log("Success status:", result.success);
+
+                //         // Log the combinations array to check if it contains data
+                //         console.log("Combinations array:", result.combinations);
+
+
+
+
+                //         if (result.success) {
+                //             if (Array.isArray(result.combinations)) {
+                //                 $("#result").empty();
+
+                //                 // Start creating the table with the desired structure
+                //                 var resultTable = '<table class="table table-striped"><thead><tr>';
+                //                 resultTable += '<th>Combination Id</th>';
+
+                //                 // Assuming material names are dynamic and you want them as headers
+                //                 var materialNames = [];
+                //                 result.combinations.forEach(function (combination) {
+                //                     combination.combinationResults.forEach(function (res) {
+                //                         if (!materialNames.includes(res.materialName)) {
+                //                             materialNames.push(res.materialName);
+                //                         }
+                //                     });
+                //                 });
+
+                //                 // Add headers for each material name
+                //                 materialNames.forEach(function (name) {
+                //                     resultTable += `<th>${name}</th>`;
+                //                 });
+
+                //                 resultTable += `<th>Sponge Cost ABCD</th>`;
+                //                 resultTable += `<th>Total Pro. Sponge</th>`;
+                //                 resultTable += `<th>Gaunge</th>`;
+                //                 resultTable += `<th>Phos</th>`;
+                //                 resultTable += '</tr></thead><tbody>';
+
+                //                 result.combinations.forEach(function (combination) {
+                //                     var spongeCostSum = 0;
+                //                     var totalProSpongeSum = 0;
+                //                     var totalcostironpriceconversion = 0;
+                //                     var mgfexpe = 0;
+                //                     var TotalMgfexp = 0;
+
+                //                     var Dolomite = 0;
+                //                     var Tnetironcost = 0;
+                //                     var fixedcost = 0;
+                //                     var materialData = {};
+                //                     var Tfixedcost = 0;
+                //                     var TcoalRequ = 0;
+                //                     var SconsuptionCoal = 0;
+                //                     var BtotalcoalCost = 0;
+
+                //                     var Coalcost = 0;
+
+                //                     var GaungeinSponge = 0;
+                //                     var SumgaungeinSponge = 0;
+                //                     var PhosinSponge = 0;
+                //                     var SumPhosinSponge = 0;
+
+
+
+                //                     // Initialize material data for each material
+                //                     materialNames.forEach(function (name) {
+                //                         materialData[name] = 0; // Start with 0% usage
+                //                     });
+
+                //                     if (Array.isArray(combination.combinationResults)) {
+                //                         combination.combinationResults.forEach(function (res) {
+                //                             // Sum up the sponge cost and total pro sponge
+
+                //                             totalProSpongeSum += res.totalProductionSponge || 0;
+                //                             Dolomite = res.dolomiteCost || 0;
+
+                //                             Tnetironcost += res.totalNetIronCost || 0;
+
+                //                             mgfexpe = res.mgfOther || 0;
+
+                //                             fixedcost = res.fixedCostOther || o;
+
+                //                             TcoalRequ += res.totalCoalRequired || 0;
+                //                             Coalcost = res.coalCost || 0;
+
+                //                             GaungeinSponge += ((res.guengeInSpong) * (res.totalProductionSponge));
+
+
+                //                             PhosinSponge += ((res.phosInSpong) * (res.totalProductionSponge));
+
+                //                             // Assign percentage to the correct material
+                //                             materialData[res.materialName] = res.netKlinUsesPer || 0;
+
+                //                         });
+
+                //                         // Create a row for the current combination
+                //                         resultTable += '<tr>';
+                //                         resultTable += `<td>${combination.combinationId || 'N/A'}</td>`;
+
+                //                         // Add columns for each material's usage percentage
+                //                         materialNames.forEach(function (name) {
+                //                             resultTable += `<td>${materialData[name]}</td>`;
+                //                         });
+
+                //                         SumPhosinSponge = PhosinSponge / totalProSpongeSum;
+                //                         SumgaungeinSponge = GaungeinSponge / totalProSpongeSum;
+                //                         SconsuptionCoal = TcoalRequ / totalProSpongeSum;
+
+                //                         totalcostironpriceconversion = Tnetironcost / totalProSpongeSum;
+                //                         TotalMgfexp = mgfexpe / totalProSpongeSum;
+                //                         Tfixedcost = fixedcost / totalProSpongeSum;
+                //                         BtotalcoalCost = SconsuptionCoal * Coalcost;
+
+                //                         spongeCostSum = totalcostironpriceconversion + TotalMgfexp + Tfixedcost + BtotalcoalCost + Dolomite;
+                //                         // Add summed Sponge Cost and Total Pro Sponge
+                //                         resultTable += `<td>${spongeCostSum.toFixed(2)}</td>`;
+                //                         resultTable += `<td>${totalProSpongeSum.toFixed(2)}</td>`;
+                //                         resultTable += `<td>${SumgaungeinSponge.toFixed(4)}</td>`;
+
+
+                //                         resultTable += `<td>${SumPhosinSponge.toFixed(4)}</td>`;
+
+
+
+                //                         resultTable += '</tr>';
+                //                     } else {
+                //                         resultTable += '<tr><td colspan="3">No results</td></tr>';
+                //                     }
+                //                 });
+
+
+                //                 resultTable += '</tbody></table>';
+
+                //                 $("#result").html(resultTable);
+                //             } else {
+                //                 console.error("Results array is not defined or is not an array");
+                //                 $("#result").html("<p>Error: No results available.</p>");
+                //             }
+                //         } else {
+                //             console.error("Request was not successful");
+                //             $("#result").html("<p>Error: Request failed.</p>");
+                //         }
+
+                //     },
+                //     error: function (xhr, status, error) {
+                //         console.error("AJAX error:", error);
+                //         console.log("Full xhr object:", xhr);
+                //         $("#result").html("An error occurred while performing the calculations.");
+                //     }
+                // });
+
+            });
+
+
+
+
+        });
+
+
+        $(document).ready(function () {
+            if ($('#manualInput').is(':checked')) {
+                $('#manualInputSection').show();
+                $('#autoGenerateSection').hide();
+            } else if ($('#autoGenerate').is(':checked')) {
+                $('#manualInputSection').hide();
+                $('#autoGenerateSection').show();
+            }
+        });
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

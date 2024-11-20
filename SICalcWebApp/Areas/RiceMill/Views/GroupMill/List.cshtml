@@ -1,0 +1,34 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.RiceMill.Models.GroupMill>;
+
+<h2>Group Mills</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Group ID</th>
+            <th>Group Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model)
+        {
+            <tr>
+                <td>@group.GroupId</td>
+                <td>@group.GroupName</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@group.GroupId" class="btn btn-warning">Edit</a>
+                    @* <a asp-action="Delete" asp-route-id="@group.GroupId" class="btn btn-danger">Delete</a> *@
+
+                     <!-- Delete Button with Confirmation -->
+                    <form asp-action="Delete" asp-route-id="@group.GroupId" method="post" style="display:inline;" 
+                          onsubmit="return confirm('Are you sure you want to delete this group?');">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Create New Group Mill</a>

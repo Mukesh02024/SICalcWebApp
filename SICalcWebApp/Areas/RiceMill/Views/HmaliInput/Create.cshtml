@@ -1,0 +1,160 @@
+﻿@model SICalcWebApp.Areas.RiceMill.Models.HmaliInput
+
+@{
+    ViewData["Title"] = "Create Hmali Input";
+}
+
+<h2>Create Hmali Input</h2>
+
+<form asp-action="Create" method="post" id="hmaliInputForm">
+    <div class="form-group">
+        <label asp-for="GroupId" class="control-label"></label>
+        <select asp-for="GroupId" class="form-control" id="groupDropdown">
+            <option value="">Select Group</option>
+            @foreach (var group in ViewBag.GroupId)
+            {
+                <option value="@group.Value">@group.Text</option>
+            }
+        </select>
+        <span asp-validation-for="GroupId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ItemNumber" class="control-label"></label>
+        <select asp-for="ItemNumber" class="form-control" id="itemNumber">
+            <option value="">Select Item</option>
+        </select>
+        <span asp-validation-for="ItemNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ItemName" class="control-label">Item Name</label>
+        <input asp-for="ItemName" class="form-control" id="ItemName" readonly />
+        <input type="hidden" asp-for="ItemName" /> <!-- Hidden field to ensure submission -->
+        <span asp-validation-for="ItemName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Rate" class="control-label">Rate</label>
+        <input asp-for="Rate" class="form-control" id="Rate" readonly />
+        <input type="hidden" asp-for="Rate" /> <!-- Hidden field to ensure submission -->
+        <span asp-validation-for="Rate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Capacity" class="control-label">Capacity</label>
+        <input asp-for="Capacity" class="form-control" id="Capacity" readonly />
+        <input type="hidden" asp-for="Capacity" /> <!-- Hidden field to ensure submission -->
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Quantity" class="control-label">Quantity</label>
+        <input asp-for="Quantity" class="form-control" id="Quantity" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="EntryDate" class="control-label">Entry Date</label>
+        <input asp-for="EntryDate" class="form-control" type="date" id="EntryDate" value="@Model.EntryDate.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="EntryDate" class="text-danger"></span>
+    
+    </div>
+
+    @* <div class="form-group">
+        <label asp-for="EntryDate" class="control-label">Entry Date</label>
+        <input asp-for="EntryDate" class="form-control" type="date" id="EntryDate" />
+        <span asp-validation-for="EntryDate" class="text-danger"></span>
+    </div> *@
+
+    <div class="form-group">
+        <label>Total Cost</label>
+        <input asp-for="TotalValue" class="form-control" id="TotalCost" readonly />
+        <span asp-validation-for="TotalValue" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="List" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#groupDropdown').change(function () {
+                var groupId = $(this).val();
+                if (groupId) {
+                    $.getJSON('@Url.Action("GetItemsByGroup")', { groupId: groupId }, function (items) {
+                        console.log('Items received:', items);
+                        $('#itemNumber').empty().append('<option value="">Select Item</option>');
+                        $.each(items, function (index, item) {
+                            $('#itemNumber').append($('<option></option>').attr('value', item.itemNumber).text(item.itemNumber));
+                        });
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error fetching items:', textStatus, errorThrown);
+                    });
+                } else {
+                    $('#itemNumber').empty().append('<option value="">Select Item</option>');
+                }
+            });
+
+            $('#itemNumber').change(function () {
+                var itemNumber = $(this).val();
+                if (itemNumber) {
+                    $.getJSON('@Url.Action("GetItemDetails")', { itemNumber: itemNumber }, function (item) {
+                        if (item) {
+                            $('#ItemName').val(item.itemName);
+                            $('#Rate').val(item.rate);
+                            $('#Capacity').val(item.capacity);
+                            updateTotalCost();
+                        } else {
+                            $('#ItemName').val('');
+                            $('#Rate').val('');
+                            $('#Capacity').val('');
+                            $('#TotalCost').val(''); // Clear Total Cost if no item
+                        }
+                    });
+                } else {
+                    $('#ItemName').val('');
+                    $('#Rate').val('');
+                    $('#Capacity').val('');
+                    $('#TotalCost').val(''); // Clear Total Cost if no item
+                }
+            });
+
+
+            $('#Quantity').on('input', function () {
+                updateTotalCost(); // Recalculate Total Cost when Quantity changes
+            });
+
+
+            function updateTotalCost() {
+                var rate = parseFloat($('#Rate').val()) || 0; // Get Rate
+                var quantity = parseFloat($('#Quantity').val()) || 0; // Get Quantity
+                var totalCost = rate * quantity; // Calculate Total Cost
+                $('#TotalCost').val(totalCost.toFixed(2)); // Update Total Cost field
+            }
+
+        });
+    </script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

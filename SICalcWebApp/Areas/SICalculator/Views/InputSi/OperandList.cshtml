@@ -1,0 +1,70 @@
+﻿   @model IEnumerable<SICalcWebApp.Areas.SICalculator.Models.InputOperand>
+
+@{
+    ViewData["Title"] = "OperandList";
+}
+
+<h1>OperandList</h1>
+
+@if (TempData["Message"] != null)
+{
+    <p> @TempData["Message"] </p>
+}
+
+<p>
+    <a asp-action="CreateOperand">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.Sidename)</th>
+            <th>@Html.DisplayNameFor(model => model.IronType)</th>
+            <th>@Html.DisplayNameFor(model => model.FeT)</th>
+            <th>@Html.DisplayNameFor(model => model.Moisture)</th>
+            <th>@Html.DisplayNameFor(model => model.Gangue)</th>
+            <th>@Html.DisplayNameFor(model => model.Phos)</th>
+            <th>@Html.DisplayNameFor(model => model.Yield)</th>
+            <th>@Html.DisplayNameFor(model => model.IronPrice)</th>
+            <th>@Html.DisplayNameFor(model => model.GroundLoss)</th>
+            <th>@Html.DisplayNameFor(model => model.FineLoss)</th>
+            <th>FR</th>
+            <th>FRValue</th>
+            <th>@Html.DisplayNameFor(model => model.FeMSponge)</th>
+            <th>@Html.DisplayNameFor(model => model.TransferLoss)</th>
+            <th>@Html.DisplayNameFor(model => model.YLoss)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Sidename)</td>
+                <td>@Html.DisplayFor(modelItem => item.IronType.IronTypeName)</td>
+                <td>@Html.DisplayFor(modelItem => item.FeT)</td>
+                <td>@Html.DisplayFor(modelItem => item.Moisture)</td>
+                <td>@Html.DisplayFor(modelItem => item.Gangue)</td>
+                <td>@Html.DisplayFor(modelItem => item.Phos)</td>
+                <td>@Html.DisplayFor(modelItem => item.Yield)</td>
+                <td>@Html.DisplayFor(modelItem => item.IronPrice)</td>
+                <td>@Html.DisplayFor(modelItem => item.GroundLoss)</td>
+                <td>@Html.DisplayFor(modelItem => item.FineLoss)</td>
+     
+                <td>@Html.DisplayFor(modelItem => item.FinesRealisationValue)</td>
+                <td>@Html.DisplayFor(modelItem => item.FeMSponge)</td>
+                <td>@Html.DisplayFor(modelItem => item.TransferLoss)</td>
+                <td>@Html.DisplayFor(modelItem => item.YLoss)</td>
+                <td>
+                    <div class="btn-group">
+                        <a class="btn btn-primary btn-sm" asp-action="EditOperand" asp-route-id="@item.ProductID">Edit</a>
+                         <form asp-action="DeleteOperand" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.ProductID" />
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,46 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.RiceMill.VM.HmaliInputViewModel>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Quantity</th>
+            <th>Rate</th>
+            <th>Total Value</th>
+            <th>Entry Date</th>
+            <th>Group Name</th>
+            <th>Actions</th> <!-- Column for Edit/Delete buttons -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ItemName</td>
+                <td>@item.Quantity</td>
+                <td>@item.Rate</td>
+                <td>@(item.Rate * item.Quantity)</td> <!-- Dynamically calculated TotalValue -->
+            @*     <td>@item.TotalValue</td> *@
+                <td>@item.EntryDate.ToString("yyyy-MM-dd")</td>
+           @*      <td>@item.GroupId</td> *@
+                <td>@item.GroupName</td>
+
+
+                <td>
+                    <!-- Action buttons -->
+                    <a href="@Url.Action("Edit", "HmaliInput", new { id = item.HmaliId })" class="btn btn-primary">Edit</a>
+
+                    <form asp-action="Delete" asp-route-id="@item.HmaliId" method="post" style="display:inline;"
+                          onsubmit="return confirm('Are you sure you want to delete this Record?');">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                    
+                    
+                    @* <a href="@Url.Action("Delete", "HmaliInput", new { id = item.HmaliId })" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a> *@
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

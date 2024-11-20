@@ -1,0 +1,51 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.SICalculator.Models.PriceOfMaterial>
+
+@{
+    ViewData["Title"] = "PriceList";
+}
+
+<h1>PriceList</h1>
+
+@if (TempData["Message"] != null)
+{
+    <p>@TempData["Message"]</p>
+}
+
+@* <p>
+    <a asp-action="CreatePrice">Create New</a>
+</p> *@
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.DolomiteRate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MgfExpence)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FixedCost)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DolomiteRate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.MgfExpence)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FixedCost)
+            </td>
+            <td>
+                    <a asp-action="EditPrice" asp-route-id="@item.PriceInputId">Edit</a> |
+             
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

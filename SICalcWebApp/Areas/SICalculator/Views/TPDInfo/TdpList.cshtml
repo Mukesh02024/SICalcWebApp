@@ -1,0 +1,60 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.SICalculator.Models.TPDInfo>
+
+@{
+    ViewData["Title"] = "TdpList";
+}
+
+<h1>TdpList</h1>
+
+@if (TempData["Message"] != null)
+{
+    <p>@TempData["Message"]</p>
+}
+
+<p>
+    <a asp-action="TpdCreate">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.KilnName)
+            
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TPD)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                    @Html.DisplayFor(modelItem => item.KilnName)
+            </td>
+            <td>
+             
+
+                    @Html.DisplayFor(modelItem => item.TPD)
+            </td>
+            <td>
+                    <a asp-action="TpdEdit" class="btn btn-primary" asp-route-id="@item.TPDId">Edit</a> |
+                 
+            </td>
+                <td>
+                
+
+
+                    <form asp-action="TpdDelete" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.TPDId" />
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+
+                </td>
+          
+        </tr>
+}
+    </tbody>
+</table>

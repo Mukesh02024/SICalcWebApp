@@ -1,0 +1,116 @@
+﻿@model SICalcWebApp.Areas.SICalculator.VM.InputOperandsVM
+
+@{
+    ViewData["Title"] = "Create Input Operands";
+}
+
+<h2>Create Input Operands</h2>
+
+<form asp-action="CreateOperand" method="post">
+    <div class="form-group">
+        <label asp-for="InputOperandss.Sidename" class="control-label"></label>
+        <input asp-for="InputOperandss.Sidename" class="form-control" />
+        <span asp-validation-for="InputOperandss.Sidename" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.IronTypeId" class="control-label">Iron Type</label>
+        <select asp-for="InputOperandss.IronTypeId" class="form-control" asp-items="@(new SelectList(Model.IronTypes, "Id", "IronTypeName"))">
+            <option value="">-- Select Iron Type --</option>
+        </select>
+        <span asp-validation-for="InputOperandss.IronTypeId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.FeT" class="control-label"></label>
+        <input asp-for="InputOperandss.FeT" class="form-control" />
+        <span asp-validation-for="InputOperandss.FeT" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.Moisture" class="control-label"></label>
+        <input asp-for="InputOperandss.Moisture" class="form-control" />
+        <span asp-validation-for="InputOperandss.Moisture" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.Gangue" class="control-label"></label>
+        <input asp-for="InputOperandss.Gangue" class="form-control" />
+        <span asp-validation-for="InputOperandss.Gangue" class="text-danger"></span>
+    </div>   
+
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.Phos" class="control-label"></label>
+        <input asp-for="InputOperandss.Phos" class="form-control" />
+        <span asp-validation-for="InputOperandss.Phos" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.Yield" class="control-label"></label>
+        <input asp-for="InputOperandss.Yield" class="form-control" />
+        <span asp-validation-for="InputOperandss.Yield" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.IronPrice" class="control-label"></label>
+        <input asp-for="InputOperandss.IronPrice" class="form-control" />
+        <span asp-validation-for="InputOperandss.IronPrice" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.GroundLoss" class="control-label"></label>
+        <input asp-for="InputOperandss.GroundLoss" class="form-control" />
+        <span asp-validation-for="InputOperandss.GroundLoss" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.FineLoss" class="control-label"></label>
+        <input asp-for="InputOperandss.FineLoss" class="form-control" />
+        <span asp-validation-for="InputOperandss.FineLoss" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.FinesRealisationValue" class="control-label"></label>
+        <input asp-for="InputOperandss.FinesRealisationValue" class="form-control" />
+        <span asp-validation-for="InputOperandss.FinesRealisationValue" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.FeMSponge" class="control-label"></label>
+        <input asp-for="InputOperandss.FeMSponge" class="form-control" />
+        <span asp-validation-for="InputOperandss.FeMSponge" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.TransferLoss" class="control-label"></label>
+        <input asp-for="InputOperandss.TransferLoss" class="form-control" />
+        <span asp-validation-for="InputOperandss.TransferLoss" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="InputOperandss.YLoss" class="control-label"></label>
+        <input asp-for="InputOperandss.YLoss" class="form-control" />
+        <span asp-validation-for="InputOperandss.YLoss" class="text-danger"></span>
+    </div>
+
+
+    <!-- Add similar input fields for other properties as needed -->
+
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="OperandList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

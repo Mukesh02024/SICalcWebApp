@@ -1,0 +1,39 @@
+﻿@model SICalcWebApp.Areas.SICalculator.Models.TPDInfo
+
+@{
+    ViewData["Title"] = "TpdEdit";
+}
+
+<h1>TpdEdit</h1>
+
+<h4>TPDInfo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="TpdEdit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="TPDId" />
+            <div class="form-group">
+                <label asp-for="TPD" class="control-label"></label>
+                <input asp-for="TPD" class="form-control" />
+                <span asp-validation-for="TPD" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="KilnName" class="control-label"></label>
+                <input asp-for="KilnName" class="form-control" />
+                <span asp-validation-for="KilnName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="TdpList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

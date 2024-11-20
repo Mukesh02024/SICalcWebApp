@@ -1,0 +1,100 @@
+﻿@model SICalcWebApp.Areas.RiceMill.VM.HmaliSearchViewModel
+
+@{
+    ViewData["Title"] = "Search Hmali Inputs";
+}
+
+<h2>Search Hmali Inputs</h2>
+
+<form asp-action="Search" method="get">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label>Date From</label>
+        <input type="date" asp-for="FromDate" class="form-control" />
+        <span asp-validation-for="FromDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Date To</label>
+        <input type="date" asp-for="ToDate" class="form-control" />
+        <span asp-validation-for="ToDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Select Group</label>
+        <select asp-for="GroupId" asp-items="Model.Groups" class="form-control" id="groupDropdown">
+            <option value="">Select Group</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Select Item (Optional)</label>
+        <select asp-for="ItemNumber" asp-items="Model.Items" class="form-control" id="itemDropdown">
+            <option value="">Select Item</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+@if (Model.SearchResults != null && Model.SearchResults.Any())
+{
+    <h3>Search Results</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Group Name</th>
+                <th>Item Name</th>
+                <th>Rate</th>
+                <th>Quantity</th>
+                <th>Capacity</th>
+                <th>Entry Date</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.SearchResults)
+            {
+                <tr>
+                    <td>@item.GroupName</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.Rate</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Capacity</td>
+                    <td>@item.EntryDate.ToString("dd/MM/yyyy")</td>
+                    <td>@(item.Rate * item.Quantity)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Grand Total: @Model.GrandTotal.ToString("F2")</h4>
+}
+
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#groupDropdown').change(function () {
+            var groupId = $(this).val();
+            if (groupId) {
+                $.getJSON('@Url.Action("GetItemsByGroup", "HmaliInput", new { area = "RiceMill" })', { groupId: groupId }, function (items) {
+                    $('#itemDropdown').empty().append('<option value="">Select Item</option>');
+                    $.each(items, function (index, item) {
+                        $('#itemDropdown').append($('<option></option>').attr('value', item.itemNumber).text(item.itemName));
+                    });
+                });
+            } else {
+                $('#itemDropdown').empty().append('<option value="">Select Item</option>');
+            }
+        });
+    });
+</script>
+
+
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

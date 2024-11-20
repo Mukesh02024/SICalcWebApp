@@ -1,0 +1,39 @@
+﻿@model SICalcWebApp.Areas.SICalculator.Models.FC
+
+@{
+    ViewData["Title"] = "FcEdit";
+}
+
+<h1>FcEdit</h1>
+
+<h4>FC</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="FcEdit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="FCId" />
+            <div class="form-group">
+                <label asp-for="FCValue" class="control-label"></label>
+                <input asp-for="FCValue" class="form-control" />
+                <span asp-validation-for="FCValue" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="C_Fe" class="control-label"></label>
+                <input asp-for="C_Fe" class="form-control" />
+                <span asp-validation-for="C_Fe" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="FcList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

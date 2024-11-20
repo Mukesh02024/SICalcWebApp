@@ -1,0 +1,66 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.SICalculator.Models.FCInfo>
+
+@{
+    ViewData["Title"] = "FCInfoList";
+}
+
+<h1>FCInfoList</h1>
+
+@if (TempData["Message"] != null)
+{
+    <p>@TempData["Message"] </p>
+    
+}
+
+<p>
+    <a asp-action="FCInfoCreate">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.FC)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TPDInfo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FeedRate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+
+         @*        <td>
+                    @Html.DisplayFor(modelItem => item.FC.FCId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TPDInfo.TPDId)
+                </td> *@
+
+
+            <td>
+                @Html.DisplayFor(modelItem => item.FC.FCValue)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TPDInfo.KilnName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FeedRate)
+            </td>
+            <td>
+                    <a asp-action="FCInfoEdit" asp-route-id="@item.FCInfoId">Edit</a> |
+
+                    <form asp-action="FCInfoDelete" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.FCInfoId" />
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

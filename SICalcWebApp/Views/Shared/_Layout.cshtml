@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - My ASP.NET Application</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom CSS for layout -->
+    <style>
+        /* Sidebar Styles */
+        .left-panel {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #212529;
+            padding-top: 20px;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+            .left-panel.hide {
+                transform: translateX(-100%);
+            }
+
+            .left-panel a {
+                color: #adb5bd;
+                text-decoration: none;
+                padding: 10px 15px;
+                display: block;
+            }
+
+                .left-panel a:hover {
+                    background-color: #007bff;
+                    color: white;
+                }
+
+        .menu-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+            .menu-title i {
+                margin-right: 10px;
+            }
+
+        .sub-menu {
+            list-style-type: none;
+            padding-left: 10px;
+            display: none;
+        }
+
+        /* Header Styles */
+        .navbar {
+            background-color: #007bff;
+            border-bottom: 1px solid #6c757d;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-weight: bold;
+        }
+
+            .navbar-brand:hover {
+                color: #dbe7f3;
+            }
+
+        .navbar-nav .nav-link {
+            color: white;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #dbe7f3;
+            }
+
+        /* Main Content */
+        .content-wrapper {
+            margin-left: 250px;
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+            .content-wrapper.shrink {
+                margin-left: 0;
+            }
+
+        .container-centered {
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px;
+            position: relative;
+            bottom: 0;
+            width: calc(100% - 250px);
+        }
+
+        /* Toggle button */
+        .sidebar-toggle {
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            background: none;
+            border: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="left-panel" id="sidebar">
+        <div class="sidebar-header">
+            <h4>AdminPanel</h4>
+        </div>
+
+        <!-- SICalc Section -->
+        @if (User.IsInRole(SD.Role_Sponge_Admin) || User.IsInRole(SD.Role_Super_Admin))
+        {
+            <div class="menu-item">
+                <a href="#" class="menu-title" data-toggle="sub-menu-1">
+                    <i class="fas fa-cogs"></i> SICalc
+                </a>
+                <ul class="sub-menu" id="sub-menu-1">
+                    @if (User.IsInRole(SD.Role_Super_Admin))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@Url.Action("Index", "Home")">
+                                Register as a new user
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FeedRateAvg" asp-action="Index">GetCalculation</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="TPDInfo" asp-action="TdpList">Kiln Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FC" asp-action="FcList">FC Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FcInfo" asp-action="FCInfoList">FeedRateService</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="PriceOfM" asp-action="PriceList">Expense Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="IronType" asp-action="IronList">Add-Iron-Type</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="InputSi" asp-action="OperandList">Add Material Details</a></li>
+                </ul>
+            </div>
+        }
+
+
+        <div class="menu-item">
+            <!-- This title will be visible to all users -->
+            <a href="#" class="menu-title" data-toggle="sub-menu-2">
+                <i class="fas fa-seedling"></i> RiceMill
+            </a>
+            <ul class="sub-menu" id="sub-menu-2">
+                @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
+                {
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
+                }
+
+                @if (User.IsInRole(SD.Role_Checker_Admin) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
+                {
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Search">Search Date Wise</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="PivotSummary">Search Group Wise</a></li>
+                }
+
+                @if (User.IsInRole(SD.Role_Mill_Supervisor) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
+                {
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create">Entry Daily Basis</a></li>
+                }
+            </ul>
+        </div>
+
+
+
+        @*  <!-- RiceMill Section -->
+        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) )
+        {
+        <div class="menu-item">
+        <a href="#" class="menu-title" data-toggle="sub-menu-2">
+        <i class="fas fa-seedling"></i> RiceMill
+        </a>
+        <ul class="sub-menu" id="sub-menu-2">
+        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
+        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
+
+        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) || User.IsInRole(SD.Role_Checker_Admin))
+        {
+        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Search">Search Date Wise</a></li>
+        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="PivotSummary">Search Group Wise</a></li>
+        }
+
+        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) || User.IsInRole(SD.Role_Mill_Supervisor))
+        {
+        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create">Entry Daily Basis</a></li>
+        }
+        </ul>
+        </div>
+        } *@
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-wrapper" id="content">
+        <nav class="navbar navbar-expand-sm">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand" href="#">AdminPanel</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <partial name="_LoginPartial" />
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="container-centered">
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        // Toggle sidebar visibility
+        document.getElementById("sidebarToggle").addEventListener("click", function () {
+            var sidebar = document.getElementById("sidebar");
+            var content = document.getElementById("content");
+            sidebar.classList.toggle("hide");
+            content.classList.toggle("shrink");
+        });
+
+        // Toggle sub-menus
+        document.querySelectorAll('.menu-title').forEach(function (menuTitle) {
+            menuTitle.addEventListener('click', function (event) {
+                event.preventDefault();
+                var subMenuId = event.target.getAttribute('data-toggle');
+                var subMenu = document.getElementById(subMenuId);
+                subMenu.style.display = (subMenu.style.display === 'none' || !subMenu.style.display) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

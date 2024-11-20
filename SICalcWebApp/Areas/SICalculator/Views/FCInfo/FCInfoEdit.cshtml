@@ -1,0 +1,44 @@
+﻿@model SICalcWebApp.Areas.SICalculator.Models.FCInfo
+
+@{
+    ViewData["Title"] = "FCInfoEdit";
+}
+
+<h1>FCInfoEdit</h1>
+
+<h4>FCInfo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="FCInfoEdit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="FCInfoId" />
+            <div class="form-group">
+                <label asp-for="FCId" class="control-label"></label>
+                <select asp-for="FCId" class="form-control" asp-items="ViewBag.FCId"></select>
+                <span asp-validation-for="FCId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TPDId" class="control-label"></label>
+                <select asp-for="TPDId" class="form-control" asp-items="ViewBag.TPDId"></select>
+                <span asp-validation-for="TPDId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FeedRate" class="control-label"></label>
+                <input asp-for="FeedRate" class="form-control" />
+                <span asp-validation-for="FeedRate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="FCInfoList">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

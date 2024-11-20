@@ -1,0 +1,168 @@
+﻿@model SICalcWebApp.Areas.RiceMill.Models.HmaliInput
+
+@{
+    ViewData["Title"] = "Edit Hmali Input";
+}
+
+<h2>Edit Hmali Input</h2>
+
+<form asp-action="Edit">
+
+    <input type="hidden" asp-for="HmaliId" />
+
+    <div class="form-group">
+        <label asp-for="GroupId" class="control-label"></label>
+        <select asp-for="GroupId" class="form-control" id="GroupId">
+            <option value="">Select Group</option>
+            @foreach (var group in ViewBag.GroupId)
+            {
+                <option value="@group.Value" selected="@(group.Value == Model.GroupId.ToString() ? "selected" : null)">@group.Text</option>
+            }
+        </select>
+        <span asp-validation-for="GroupId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ItemNumber" class="control-label"></label>
+        <select asp-for="ItemNumber" class="form-control" id="ItemId">
+            <option value="">Select Item</option>
+            @foreach (var item in ViewBag.ItemId)
+            {
+                <option value="@item.Value" selected="@(item.Value == Model.HmaliId.ToString() ? "selected" : null)">@item.Text</option>
+            }
+        </select>
+        <span asp-validation-for="HmaliId" class="text-danger"></span>
+    </div>
+
+ @*    <div class="form-group">
+        <label asp-for="Rate" class="control-label" ></label>
+        <input asp-for="Rate" class="form-control" id="Rate" readonly />
+        <span asp-validation-for="Rate" class="text-danger"></span>
+    </div> *@
+
+    <div class="form-group">
+        <label asp-for="Rate" class="control-label">Rate</label>
+        <input asp-for="Rate" class="form-control" id="Rate" readonly />
+        <input type="hidden" asp-for="Rate" /> <!-- Hidden field to ensure submission -->
+        <span asp-validation-for="Rate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Quantity" class="control-label"></label>
+        <input asp-for="Quantity" class="form-control" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+@* 
+    <div class="form-group">
+        <label asp-for="Capacity" class="control-label"></label>
+        <input asp-for="Capacity" class="form-control" id="Rate" readonly />
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div> *@
+    <!-- Readonly Textbox for ItemName -->
+
+    <div class="form-group">
+        <label for="ItemName">Item Name</label>
+        <input asp-for="ItemName" id="ItemName" name="ItemName" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Capacity" class="control-label">Capacity</label>
+        <input asp-for="Capacity" class="form-control" id="Capacity" readonly />
+        <input type="hidden" asp-for="Capacity" /> <!-- Hidden field to ensure submission -->
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div>
+
+
+
+
+
+    <div class="form-group">
+        <label asp-for="EntryDate" class="control-label"></label>
+     @*    <input asp-for="EntryDate" class="form-control" /> *@
+        <input asp-for="EntryDate" class="form-control" type="date" value="@Model.EntryDate.ToString("yyyy-MM-dd")" />
+        <span asp-validation-for="EntryDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Edit</button>
+
+    <a asp-action="List" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Event handler for group dropdown change
+            $('#GroupId').change(function () {
+                var groupId = $(this).val();
+
+                // If no group is selected, clear items dropdown
+                if (!groupId) {
+                    $('#ItemId').empty();
+                    $('#ItemId').append('<option value="">Select Item</option>');
+                    return;
+                }
+
+                // AJAX call to fetch items based on selected group
+                $.ajax({
+                    url: '@Url.Action("GetItemsByGroupp", "HmaliInput")',
+                    type: 'GET',
+                    data: { groupId: groupId },
+                    success: function (data) {
+                        // Clear existing items
+                        $('#ItemId').empty();
+                        $('#ItemId').append('<option value="">Select Item</option>');
+
+                        // Populate new items
+                        $.each(data, function (index, item) {
+                            $('#ItemId').append('<option value="' + item.itemId + '">' + item.itemName + '</option>');
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("An error occurred while fetching items: ", error);
+                    }
+                });
+            });
+
+
+
+
+
+
+
+            $('#ItemId').change(function () {
+                var itemId = $(this).val();
+
+                if (!itemId) {
+                    // Clear Rate and Capacity if no item is selected
+                    $('input[name="Rate"]').val('');
+                    $('input[name="Capacity"]').val('');
+                    return;
+                }
+
+                // AJAX call to fetch Rate and Capacity based on selected item
+                $.ajax({
+                    url: '@Url.Action("GetItemDetailss", "HmaliInput")',
+                    type: 'GET',
+                    data: { itemNumber: itemId},
+                    success: function (data) {
+                        // Update Rate and Capacity fields with the fetched data
+                        $('input[name="Rate"]').val(data.rate);
+                        $('input[name="Capacity"]').val(data.capacity);
+                        $('input[name="ItemName"]').val(data.itemName);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("An error occurred while fetching item details: ", error);
+                    }
+                });
+            });
+            // Optionally handle the item change event to update Rate/Capacity if needed
+        });
+
+
+
+
+
+
+    </script>
+}
