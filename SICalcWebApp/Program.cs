@@ -32,6 +32,7 @@ builder.Services.AddScoped<IGroupMillService, GroupMillService>();
 builder.Services.AddScoped<IMillItemService, MillItemService>();
 builder.Services.AddScoped<IHMaliInputService, HMaliInputService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IMasterMillPlant,MasterMillPlant>();
 
 var app = builder.Build();
 

@@ -32,6 +32,12 @@ namespace SICalcWebApp.Data
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
+        public DbSet<PaddyType> PaddyTypes { get; set; }
+
+        public DbSet<Staff> Staffs{ get; set; }
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
        
