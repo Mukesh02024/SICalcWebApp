@@ -38,6 +38,14 @@ namespace SICalcWebApp.Data
 
 
 
+        public DbSet<MillBunker> MillBunkers { get; set; }
+        public DbSet<SortexBunker> SortexBunkers { get; set; }
+        public DbSet<TypeOfHandi> TypeOfHandis { get; set; }
+        public DbSet<ProcessMethod> ProcessMethods{ get; set; }
+        public DbSet<FeedingBunker> FeedingBunkers { get; set; }
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
        

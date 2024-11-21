@@ -142,5 +142,46 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public IActionResult AddFeedBunker()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddFeedBunker(FeedingBunker bunker)
+        {
+            if (ModelState.IsValid)
+            {
+                await _service.AddAsync(bunker);
+                return RedirectToAction(nameof(AddFeedBunker));
+            }
+            return View(bunker);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
