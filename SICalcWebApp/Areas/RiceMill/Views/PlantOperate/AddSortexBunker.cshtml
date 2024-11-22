@@ -1,0 +1,33 @@
+﻿@model SICalcWebApp.Areas.RiceMill.Models.SortexBunker
+
+@{
+    ViewData["Title"] = "AddSortexBunker";
+}
+
+<h1>AddSortexBunker</h1>
+
+<h4>SortexBunker</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddSortexBunker">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="SortexBName" class="control-label"></label>
+                <input asp-for="SortexBName" class="form-control" />
+                <span asp-validation-for="SortexBName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ListSortexBunker">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,24 +1,25 @@
 ﻿@model SICalcWebApp.Areas.RiceMill.Models.FeedingBunker
 
 @{
-    ViewData["Title"] = "AddFeedBunker";
+    ViewData["Title"] = "EditFeedBunker";
 }
 
-<h1>AddFeedBunker</h1>
+<h1>EditFeedBunker</h1>
 
 <h4>FeedingBunker</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="AddFeedBunker">
+        <form asp-action="EditFeedBunker">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="FeedingBName" class="control-label"></label>
                 <input asp-for="FeedingBName" class="form-control" />
                 <span asp-validation-for="FeedingBName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
     </div>

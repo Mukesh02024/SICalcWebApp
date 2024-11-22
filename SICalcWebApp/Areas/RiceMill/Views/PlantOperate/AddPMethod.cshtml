@@ -1,21 +1,21 @@
-﻿@model SICalcWebApp.Areas.RiceMill.Models.FeedingBunker
+﻿@model SICalcWebApp.Areas.RiceMill.Models.ProcessMethod
 
 @{
-    ViewData["Title"] = "AddFeedBunker";
+    ViewData["Title"] = "AddPMethod";
 }
 
-<h1>AddFeedBunker</h1>
+<h1>AddPMethod</h1>
 
-<h4>FeedingBunker</h4>
+<h4>ProcessMethod</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="AddFeedBunker">
+        <form asp-action="AddPMethod">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="FeedingBName" class="control-label"></label>
-                <input asp-for="FeedingBName" class="form-control" />
-                <span asp-validation-for="FeedingBName" class="text-danger"></span>
+                <label asp-for="MethodName" class="control-label"></label>
+                <input asp-for="MethodName" class="form-control" />
+                <span asp-validation-for="MethodName" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
@@ -25,7 +25,7 @@
 </div>
 
 <div>
-    <a asp-action="ListFeedB">Back to List</a>
+    <a asp-action="ListPMethod">Back to List</a>
 </div>
 
 @section Scripts {

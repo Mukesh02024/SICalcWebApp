@@ -45,6 +45,9 @@ namespace SICalcWebApp.Data
         public DbSet<FeedingBunker> FeedingBunkers { get; set; }
 
 
+        public DbSet<FeedingModuleF> FeedingModuleFs { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

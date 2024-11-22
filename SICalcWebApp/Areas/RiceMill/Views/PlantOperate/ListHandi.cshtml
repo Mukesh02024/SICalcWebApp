@@ -1,0 +1,46 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.RiceMill.Models.TypeOfHandi>
+
+@{
+    ViewData["Title"] = "ListHandi";
+}
+
+<h1>ListHandi</h1>
+
+<p>
+    <a asp-action="AddHandi">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TypeHandiName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeHandiName)
+            </td>
+            <td>
+                    <a asp-action="EditHandi" asp-route-id="@item.Id" class="btn btn-secondary">Edit</a> |
+
+
+
+
+                    <form asp-action="DeleteHandi" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">
+                            Delete
+                        </button>
+                    </form>
+
+
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -1,0 +1,45 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.RiceMill.Models.ProcessMethod>
+
+@{
+    ViewData["Title"] = "ListPMethod";
+}
+
+<h1>ListPMethod</h1>
+
+<p>
+    <a asp-action="AddPMethod">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.MethodName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.MethodName)
+            </td>
+            <td>
+                    <a asp-action="EditPMethod" asp-route-id="@item.Id">Edit</a> |
+
+
+                    <form asp-action="DeletePMethod" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">
+                            Delete
+                        </button>
+                    </form>
+
+
+
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

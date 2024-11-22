@@ -1,0 +1,79 @@
+﻿@model SICalcWebApp.Areas.RiceMill.Models.FeedingModuleF
+
+@{
+    ViewData["Title"] = "AddFeed";
+}
+
+<h1>AddFeed</h1>
+
+<h4>FeedingModuleF</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddFeed">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label for="FeedingBunkerName">Feeding Bunker</label>
+                <select asp-for="FeedingBunkerName" class="form-control">
+                    <option value="">Select Bunker</option> <!-- Placeholder option -->
+                    @foreach (var bunker in ViewBag.FeedingBunkers as IEnumerable<string>)
+                    {
+                        <option value="@bunker">@bunker</option>
+                    }
+                </select>
+                <span asp-validation-for="FeedingBunkerName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfBags" class="control-label"></label>
+                <input asp-for="NumberOfBags" class="form-control" />
+                <span asp-validation-for="NumberOfBags" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+
+                <label for="PaddyTypeName">Paddy Type</label>
+                <select asp-for="PaddyTypeName" class="form-control">
+                    <option value="">Select Paddy</option> <!-- Placeholder option -->
+                    @foreach (var paddy in ViewBag.PaddyTypes as IEnumerable<string>)
+                    {
+                        <option value="@paddy">@paddy</option>
+                    }
+                </select>
+                <span asp-validation-for="PaddyTypeName" class="text-danger"></span>
+            </div>
+
+
+            <div class="form-group">
+
+
+                <label for="StaffName">Staff</label>
+                <select asp-for="StaffName" class="form-control">
+                    <option value="">Select Staff</option> <!-- Placeholder option -->
+                    @foreach (var staf in ViewBag.Staff as IEnumerable<string>)
+                    {
+                        <option value="@staf">@staf</option>
+                    }
+                </select>
+
+
+
+                <span asp-validation-for="StaffName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FeedingDate" class="control-label"></label>
+                <input asp-for="FeedingDate" class="form-control" />
+                <span asp-validation-for="FeedingDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,45 @@
+﻿@model IEnumerable<SICalcWebApp.Areas.RiceMill.Models.SortexBunker>
+
+@{
+    ViewData["Title"] = "ListSortexBunker";
+}
+
+<h1>ListSortexBunker</h1>
+
+<p>
+    <a asp-action="AddSortexBunker">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.SortexBName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SortexBName)
+            </td>
+            <td>
+                <a asp-action="EditSortexBunker" asp-route-id="@item.Id">Edit</a> |
+
+
+                    <form asp-action="DeleteSortexBunker" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">
+                            Delete
+                        </button>
+                    </form>
+
+
+
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
