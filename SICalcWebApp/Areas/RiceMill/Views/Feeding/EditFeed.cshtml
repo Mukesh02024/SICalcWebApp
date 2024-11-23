@@ -1,0 +1,124 @@
+﻿@* @model SICalcWebApp.Areas.RiceMill.Models.FeedingModuleF
+
+@{
+    ViewData["Title"] = "EditFeed";
+}
+
+<h1>EditFeed</h1>
+
+<h4>FeedingModuleF</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="EditFeed">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="FeedingBunkerName" class="control-label"></label>
+                <input asp-for="FeedingBunkerName" class="form-control" />
+                <span asp-validation-for="FeedingBunkerName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NumberOfBags" class="control-label"></label>
+                <input asp-for="NumberOfBags" class="form-control" />
+                <span asp-validation-for="NumberOfBags" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PaddyTypeName" class="control-label"></label>
+                <input asp-for="PaddyTypeName" class="form-control" />
+                <span asp-validation-for="PaddyTypeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="StaffName" class="control-label"></label>
+                <input asp-for="StaffName" class="form-control" />
+                <span asp-validation-for="StaffName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FeedingDate" class="control-label"></label>
+                <input asp-for="FeedingDate" class="form-control" />
+                <span asp-validation-for="FeedingDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ListFeed">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+ *@
+
+
+
+
+
+
+
+ @model SICalcWebApp.Areas.RiceMill.Models.FeedingModuleF
+
+@{
+    ViewData["Title"] = "Edit Feed";
+}
+
+<h1>Edit Feeding Module</h1>
+
+<h4>FeedingModuleF</h4>
+<hr />
+<form asp-action="EditFeed">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label for="FeedingBunkerName">Feeding Bunker</label>
+        <select asp-for="FeedingBunkerName" class="form-control"
+                asp-items="@(new SelectList(ViewBag.FeedingBunkers, "FeedingBName", "FeedingBName"))">
+            <option value="">Select Bunker</option>
+        </select>
+
+        <span asp-validation-for="FeedingBunkerName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="NumberOfBags">Number of Bags</label>
+        <input asp-for="NumberOfBags" class="form-control" />
+        <span asp-validation-for="NumberOfBags" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="PaddyTypeName">Paddy Type</label>
+
+        <select asp-for="PaddyTypeName" class="form-control"
+                asp-items="@(new SelectList(ViewBag.PaddyTypes, "PaddyTypeName", "PaddyTypeName"))">
+            <option value="">Select Paddy</option>
+        </select>
+        <span asp-validation-for="PaddyTypeName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="StaffName">Staff</label>
+
+        <select asp-for="StaffName" class="form-control"
+                asp-items="@(new SelectList(ViewBag.Staff, "StaffName", "StaffName"))">
+            <option value="">Select staff</option>
+        </select>
+        <span asp-validation-for="StaffName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="FeedingDate">Feeding Date</label>
+        <input asp-for="FeedingDate" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Update" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="ListFeed">Back to List</a>
+</div>
