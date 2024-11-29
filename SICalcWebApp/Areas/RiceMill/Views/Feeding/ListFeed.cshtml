@@ -4,66 +4,46 @@
     ViewData["Title"] = "ListFeed";
 }
 
-<h1>ListFeed</h1>
+<h1 class="mb-4" style="text-align:center">List of Paddy Feeding </h1>
 
 <p>
-    <a asp-action="AddFeed">Create New</a>
+    <a asp-action="AddFeed" class="btn btn-success mb-3">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.FeedingBunkerName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NumberOfBags)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaddyTypeName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StaffName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FeedingDate)
-            </th>
-            <th> Action</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.FeedingBunkerName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NumberOfBags)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaddyTypeName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StaffName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FeedingDate)
-            </td>
-            <td>
-                    <a asp-action="EditFeed" asp-route-id="@item.Id" class="btn btn-primary">Edit</a> |
 
-
-
-
-
-                    <form asp-action="DeleteFeed" method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this item?');">
-                            Delete
-                        </button>
-                    </form>
-      
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.FeedingBunkerName)</th>
+                <th>@Html.DisplayNameFor(model => model.NumberOfBags)</th>
+                <th>@Html.DisplayNameFor(model => model.PaddyTypeName)</th>
+                <th>@Html.DisplayNameFor(model => model.StaffName)</th>
+                <th>@Html.DisplayNameFor(model => model.FeedingDate)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.FeedingBunkerName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.NumberOfBags)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PaddyTypeName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.StaffName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.FeedingDate)</td>
+                    <td>
+                        <a asp-action="EditFeed" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <form asp-action="DeleteFeed" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this item?');">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
