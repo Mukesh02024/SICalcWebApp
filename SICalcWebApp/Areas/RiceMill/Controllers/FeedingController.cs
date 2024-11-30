@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
+using SICalcWebApp.Data;
 using SICalcWebApp.Repository;
 
 namespace SICalcWebApp.Areas.RiceMill.Controllers
 {
     [Area("RiceMill")]
+    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
     public class FeedingController : Controller
     {
         private readonly IMasterMillPlant _service;

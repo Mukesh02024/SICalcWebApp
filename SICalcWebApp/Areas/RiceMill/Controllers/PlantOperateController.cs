@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
+using SICalcWebApp.Data;
 
 namespace SICalcWebApp.Areas.RiceMill.Controllers
 {
     [Area("RiceMill")]
+    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
     public class PlantOperateController : Controller
     {
         private readonly IMasterMillPlant _service;
@@ -171,7 +174,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             if (ModelState.IsValid)
             {
                 await _service.AddAsync(bunker);
-                return RedirectToAction(nameof(AddFeedBunker));
+                return RedirectToAction(nameof(ListFeedB));
             }
             return View(bunker);
         }

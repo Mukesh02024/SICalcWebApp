@@ -24,6 +24,7 @@ using SICalcWebApp.Models;
 
 namespace SICalcWebApp.Areas.Identity.Pages.Account
 {
+    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;

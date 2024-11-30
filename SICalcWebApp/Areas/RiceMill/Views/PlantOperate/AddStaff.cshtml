@@ -4,30 +4,54 @@
     ViewData["Title"] = "AddStaff";
 }
 
-<h1>AddStaff</h1>
+<style>
+    /* Ensure consistent styling */
+    .form-control {
+        width: 100%;
+        height: calc(2.4rem + 2px); /* Consistent height */
+    }
+</style>
 
-<h4>Staff</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="AddStaff">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="StaffName" class="control-label"></label>
-                <input asp-for="StaffName" class="form-control" />
-                <span asp-validation-for="StaffName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow-lg" style="max-width: 500px; width: 100%;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">Staff Entry Form</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddStaff">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <!-- Staff Name -->
+                <div class="mb-3 row">
+                    <label asp-for="StaffName" class="col-sm-4 col-form-label text-end">Staff Name</label>
+                    <div class="col-sm-8">
+                        <input asp-for="StaffName" class="form-control" />
+                        <span asp-validation-for="StaffName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center">
+
+                    <button type="submit" class="btn btn-primary" style="margin-right: 15px;">
+                        <i class="fas fa-save"></i> Create
+                    </button>
+
+                    <a asp-action="StaffList" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="StaffList">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

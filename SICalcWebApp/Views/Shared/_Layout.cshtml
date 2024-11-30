@@ -8,6 +8,8 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" />
 
     <!-- Scripts -->
@@ -160,17 +162,23 @@
         }
 
 
+
+
+
+
         <div class="menu-item">
-            <!-- This title will be visible to all users -->
-            <a href="#" class="menu-title" data-toggle="sub-menu-2">
-                <i class="fas fa-seedling"></i> RiceMill
-            </a>
+
+
+            @if (User.IsInRole(SD.Role_Checker_Admin) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) ||
+            User.IsInRole(SD.Role_Mill_Supervisor))
+            {
+                <a href="#" class="menu-title" data-toggle="sub-menu-2">
+                    <i class="fas fa-seedling"></i> RiceMill
+                </a>
+            }
+      
             <ul class="sub-menu" id="sub-menu-2">
-                @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
-                {
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
-                }
+             
 
                 @if (User.IsInRole(SD.Role_Checker_Admin) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
                 {
@@ -181,8 +189,36 @@
                 @if (User.IsInRole(SD.Role_Mill_Supervisor) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
                 {
                     <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create">Entry Daily Basis</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Feeding" asp-action="ListFeed">Entry Feeding </a></li>
                 }
             </ul>
+        </div>
+
+
+
+
+
+        <div class="menu-item">
+            <!-- This title will be visible to all users -->
+         
+         
+                @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
+            {
+                <a href="#" class="menu-title" data-toggle="sub-menu-3">
+                    <i class="fa-solid fa-database"></i> MasterData
+                </a>
+                   <ul class="sub-menu" id="sub-menu-3">
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListFeedB">Feeding-Bunker</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="StaffList">Staff-List</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="PaddyTypeList">Paddy-Type</a></li>
+                </ul>
+
+                }
+
+              
+       
         </div>
 
 

@@ -1,34 +1,57 @@
 ﻿@model SICalcWebApp.Areas.RiceMill.Models.PaddyType
 
 @{
-    ViewData["Title"] = "EditPaddyType";
+    ViewData["Title"] = "Edit Paddy Type";
 }
 
-<h1>EditPaddyType</h1>
+<style>
+    /* Ensure consistent styling */
+    .form-control {
+        width: 100%;
+        height: calc(2.4rem + 2px); /* Uniform height */
+    }
+</style>
 
-<h4>PaddyType</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="EditPaddyType">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="PaddyTypeName" class="control-label"></label>
-                <input asp-for="PaddyTypeName" class="form-control" />
-                <span asp-validation-for="PaddyTypeName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow-lg" style="max-width: 500px; width: 100%;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">Edit Paddy Type Entry</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditPaddyType">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <!-- Hidden Field for ID -->
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Paddy Type Name -->
+                <div class="mb-3 row">
+                    <label asp-for="PaddyTypeName" class="col-sm-4 col-form-label text-end">Paddy Type</label>
+                    <div class="col-sm-8">
+                        <input asp-for="PaddyTypeName" class="form-control" />
+                        <span asp-validation-for="PaddyTypeName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="PaddyTypeList" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="PaddyTypeList">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

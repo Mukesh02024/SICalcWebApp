@@ -243,7 +243,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FeedingBunkers");
+                    b.ToTable("FeedingBunkers", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.FeedingModuleF", b =>
@@ -274,7 +274,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FeedingModuleFs");
+                    b.ToTable("FeedingModuleFs", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.GroupMill", b =>
@@ -291,7 +291,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("GroupId");
 
-                    b.ToTable("GroupMills");
+                    b.ToTable("GroupMills", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.HmaliInput", b =>
@@ -326,7 +326,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("HmaliId");
 
-                    b.ToTable("HmaliInputs");
+                    b.ToTable("HmaliInputs", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.MillBunker", b =>
@@ -343,7 +343,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MillBunkers");
+                    b.ToTable("MillBunkers", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.MillItem", b =>
@@ -375,7 +375,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("MillItems");
+                    b.ToTable("MillItems", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.PaddyType", b =>
@@ -393,7 +393,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaddyTypes");
+                    b.ToTable("PaddyTypes", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.ProcessMethod", b =>
@@ -410,7 +410,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProcessMethods");
+                    b.ToTable("ProcessMethods", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.SortexBunker", b =>
@@ -427,7 +427,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SortexBunkers");
+                    b.ToTable("SortexBunkers", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.Staff", b =>
@@ -445,7 +445,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Staffs");
+                    b.ToTable("Staffs", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.TypeOfHandi", b =>
@@ -462,7 +462,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TypeOfHandis");
+                    b.ToTable("TypeOfHandis", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.FC", b =>
@@ -482,7 +482,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("FCId");
 
-                    b.ToTable("FCs");
+                    b.ToTable("FCs", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.FCInfo", b =>
@@ -509,7 +509,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasIndex("TPDId");
 
-                    b.ToTable("FCInfos");
+                    b.ToTable("FCInfos", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.InputOperand", b =>
@@ -579,7 +579,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasIndex("IronTypeId");
 
-                    b.ToTable("InputOperands");
+                    b.ToTable("InputOperands", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.IronType", b =>
@@ -596,7 +596,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("IronTypes");
+                    b.ToTable("IronTypes", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.PriceOfMaterial", b =>
@@ -618,7 +618,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("PriceInputId");
 
-                    b.ToTable("PriceOfMaterials");
+                    b.ToTable("PriceOfMaterials", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.TPDInfo", b =>
@@ -638,7 +638,7 @@ namespace SICalcWebApp.Migrations
 
                     b.HasKey("TPDId");
 
-                    b.ToTable("TPDInfos");
+                    b.ToTable("TPDInfos", (string)null);
                 });
 
             modelBuilder.Entity("SICalcWebApp.Models.ApplicationUser", b =>

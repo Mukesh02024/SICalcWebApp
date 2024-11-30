@@ -1,33 +1,54 @@
 ﻿@model SICalcWebApp.Areas.RiceMill.Models.FeedingBunker
 
 @{
-    ViewData["Title"] = "AddFeedBunker";
+    ViewData["Title"] = "Add Feed Bunker";
 }
 
-<h1>AddFeedBunker</h1>
+<style>
+    /* Ensure consistent styling */
+    .form-control {
+        width: 100%;
+        height: calc(2.4rem + 2px); /* Uniform height */
+    }
+</style>
 
-<h4>FeedingBunker</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="AddFeedBunker">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FeedingBName" class="control-label"></label>
-                <input asp-for="FeedingBName" class="form-control" />
-                <span asp-validation-for="FeedingBName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+
+
+<div class="d-flex justify-content-center">
+    <div class="card shadow-lg" style="max-width: 500px; width: 100%;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">Feeding Bunker Entry</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddFeedBunker">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <!-- Feeding Bunker Name -->
+                <div class="mb-3 row">
+                    <label asp-for="FeedingBName" class="col-sm-4 col-form-label text-end">Bunker Name</label>
+                    <div class="col-sm-8">
+                        <input asp-for="FeedingBName" class="form-control" />
+                        <span asp-validation-for="FeedingBName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="ListFeedB" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="ListFeedB">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
