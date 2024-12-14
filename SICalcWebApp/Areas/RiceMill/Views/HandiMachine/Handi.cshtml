@@ -1,0 +1,102 @@
+﻿@model SICalcWebApp.Areas.RiceMill.Models.HandiProcess
+
+@{
+    ViewData["Title"] = "Handi Machine Process";
+}
+
+<div class="container" style="max-width: 600px; margin: auto;">
+    <div class="card shadow-sm">
+        <!-- Form Header -->
+        <div class="card-header bg-primary text-white text-center">
+            <h4>@ViewData["Title"]</h4>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="StartHandi" method="post">
+                <div class="row mb-3">
+                    <!-- Staff Name -->
+                    <div class="col-md-6">
+                        <label asp-for="StaffName">Staff Name</label>
+                        <select asp-for="StaffName" class="form-control">
+                            <option value="">-- Select Staff --</option>
+                            @foreach (var staffName in ViewBag.StaffNames as List<string>)
+                            {
+                                <option value="@staffName">@staffName</option>
+                            }
+                        </select>
+                        <span asp-validation-for="StaffName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Process Type -->
+                    <div class="col-md-6">
+                        <label asp-for="ProcessType">Process Type</label>
+                        <select asp-for="ProcessType" class="form-control">
+                            <option value="">-- Select Process Type --</option>
+                            @foreach (var processType in ViewBag.ProcessTypes as List<string>)
+                            {
+                                <option value="@processType">@processType</option>
+                            }
+                        </select>
+                        <span asp-validation-for="ProcessType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <!-- Paddy Type -->
+                    <div class="col-md-6">
+                        <label asp-for="PaddyType">Paddy Type</label>
+                        <select asp-for="PaddyType" class="form-control">
+                            <option value="">-- Select Paddy Type --</option>
+                            @foreach (var paddyType in ViewBag.PaddyTypes as List<string>)
+                            {
+                                <option value="@paddyType">@paddyType</option>
+                            }
+                        </select>
+                        <span asp-validation-for="PaddyType" class="text-danger"></span>
+                    </div>
+
+                    <!-- Handi Type -->
+                    <div class="col-md-6">
+                        <label asp-for="HandiType">Handi Type</label>
+                        <select asp-for="HandiType" class="form-control">
+                            <option value="">-- Select Handi Type --</option>
+                            @foreach (var handiType in ViewBag.HandiTypes as List<string>)
+                            {
+                                <option value="@handiType">@handiType</option>
+                            }
+                        </select>
+                        <span asp-validation-for="HandiType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <!-- Temperature -->
+                    <div class="col-md-6">
+                        <label asp-for="Temperature">Temperature</label>
+                        <input asp-for="Temperature" class="form-control" type="number" placeholder="Enter Temperature" />
+                        <span asp-validation-for="Temperature" class="text-danger"></span>
+                    </div>
+
+                    <!-- Pressure -->
+                    <div class="col-md-6">
+                        <label asp-for="Pressure">Pressure</label>
+                        <input asp-for="Pressure" class="form-control" type="number" placeholder="Enter Pressure" />
+                        <span asp-validation-for="Pressure" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary w-100">Start Handi Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

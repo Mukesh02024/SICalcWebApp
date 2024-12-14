@@ -1,0 +1,131 @@
+﻿@using SICalcWebApp.Areas.RiceMill.Utility
+@model SICalcWebApp.Areas.RiceMill.Models.HandiProcess
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handi Machine Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* Blinking effect for status */
+        .blinking {
+            animation: blinkingText 0.3s infinite; /* Reduced duration for faster blinking */
+            color: brown;
+        }
+
+        @@keyframes blinkingText {
+            0%
+
+        {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Handi Machine Dashboard</h1>
+        <hr />
+
+
+        <p><strong>Batch ID:</strong> @Model.BatchId</p>
+        <!-- Blinking Status -->
+        <p><strong>Status:</strong> <span class="blinking">@Model.ProcessStatus</span></p>
+
+        <!-- Start Time in new format -->
+        <p>
+            <strong>Start Time:</strong> @(Model.StartTime.HasValue
+            ? Model.StartTime.Value.ToString("HH:mm:ss (dd-MM-yyyy)")
+            : "N/A")
+        </p>
+
+        <!-- Pause Button -->
+        @if (Model.ProcessStatus == "In Progress")
+        {
+            <button class="btn btn-warning" onclick="showPauseForm()">Pause</button>
+        }
+
+        <!-- Resume and End Buttons -->
+        @if (Model.ProcessStatus == "Paused")
+        {
+            <button class="btn btn-success" onclick="performAction('resume', '@Model.BatchId')">Resume</button>
+        }
+
+        @if (Model.ProcessStatus == "In Progress" || Model.ProcessStatus == "Paused")
+        {
+            <button class="btn btn-danger" onclick="performAction('end', '@Model.BatchId')">End</button>
+        }
+
+        <!-- Pause Reason Form -->
+        <div id="pauseReasonForm" class="mt-3" style="display: none;">
+            <h4>Pause Reason</h4>
+            <div class="form-group">
+                <label for="pauseReason">Select Reason:</label>
+                <select id="pauseReason" class="form-control">
+                    @foreach (var reason in PauseReasons.Reasons)
+                    {
+                        <option value="@reason">@reason</option>
+                    }
+                </select>
+            </div>
+            <button id="submitPauseReasonButton" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        // Show Pause Form
+        function showPauseForm() {
+            document.getElementById("pauseReasonForm").style.display = "block";
+        }
+
+        // Perform Action (Pause, Resume, End)
+        function performAction(action, batchId, pauseReason = null) {
+            const urlMap = {
+                pause: '/RiceMill/HandiMachine/PauseHandi',
+                resume: '/RiceMill/HandiMachine/ResumeHandi',
+                end: '/RiceMill/HandiMachine/EndHandi',
+            };
+
+            const body = pauseReason
+                ? `batchId=${encodeURIComponent(batchId)}&pauseReason=${encodeURIComponent(pauseReason)}`
+                : `batchId=${encodeURIComponent(batchId)}`;
+
+            fetch(urlMap[action], {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        window.location.href = `/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error(`Error during '${action}':`, error);
+                });
+        }
+
+        // Pause Form Submission
+        document.getElementById("submitPauseReasonButton").addEventListener("click", function () {
+            const batchId = "@Model.BatchId"; // Dynamically populated from the model
+            const pauseReason = document.getElementById("pauseReason").value;
+            performAction('pause', batchId, pauseReason);
+        });
+    </script>
+</body>
+</html>

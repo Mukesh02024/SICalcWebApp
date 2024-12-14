@@ -22,6 +22,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<IMachineProcessService, MachineProcessService>();
+builder.Services.AddScoped<IDryerService, DryerService>();
 builder.Services.AddScoped<ITPDInfoService, TPDInfoService>();
 builder.Services.AddScoped<IFCService, FCService>();
 builder.Services.AddScoped<IFCInfoService, FCInfoService>();
@@ -33,6 +35,7 @@ builder.Services.AddScoped<IMillItemService, MillItemService>();
 builder.Services.AddScoped<IHMaliInputService, HMaliInputService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IMasterMillPlant,MasterMillPlant>();
+
 
 var app = builder.Build();
 

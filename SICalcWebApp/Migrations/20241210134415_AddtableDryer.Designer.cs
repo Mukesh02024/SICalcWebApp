@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SICalcWebApp.Data;
 
@@ -11,9 +12,11 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241210134415_AddtableDryer")]
+    partial class AddtableDryer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,11 +244,10 @@ namespace SICalcWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("DuctiPressure")
-                        .IsRequired()
+                    b.Property<double>("DuctiPressure")
                         .HasColumnType("float");
 
-                    b.Property<DateTime?>("LoadTime")
+                    b.Property<DateTime>("LoadTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PauseReason")
@@ -255,6 +257,7 @@ namespace SICalcWebApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ProcessStatus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ResumeTime")
@@ -271,7 +274,7 @@ namespace SICalcWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("UnloadTime")
+                    b.Property<DateTime>("UnloadTime")
                         .HasColumnType("datetime2");
 
                     b.HasKey("DryerProcessId");

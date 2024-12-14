@@ -49,6 +49,8 @@ namespace SICalcWebApp.Data
 
 
 
+        public DbSet<HandiProcess> HandiProcesses{ get; set; }
+        public DbSet<DryerProcess> DryerProcesses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
        

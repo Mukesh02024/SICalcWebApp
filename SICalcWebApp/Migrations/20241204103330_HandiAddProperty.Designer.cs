@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SICalcWebApp.Data;
 
@@ -11,9 +12,11 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204103330_HandiAddProperty")]
+    partial class HandiAddProperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,56 +232,6 @@ namespace SICalcWebApp.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.DryerProcess", b =>
-                {
-                    b.Property<int>("DryerProcessId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DryerProcessId"));
-
-                    b.Property<string>("BatchId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("DuctiPressure")
-                        .IsRequired()
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("LoadTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PauseReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("PauseTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProcessStatus")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResumeTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("StaffName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeSpan?>("TotalDelayTime")
-                        .HasColumnType("time");
-
-                    b.Property<string>("UnloadBunkerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UnloadTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("DryerProcessId");
-
-                    b.ToTable("DryerProcesses");
-                });
-
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.FeedingBunker", b =>
                 {
                     b.Property<int>("Id")
@@ -372,8 +325,7 @@ namespace SICalcWebApp.Migrations
                     b.Property<DateTime?>("PauseTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("Pressure")
-                        .IsRequired()
+                    b.Property<double>("Pressure")
                         .HasColumnType("float");
 
                     b.Property<string>("ProcessStatus")
@@ -390,15 +342,11 @@ namespace SICalcWebApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("StartTime")
+                    b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("Temperature")
-                        .IsRequired()
+                    b.Property<double>("Temperature")
                         .HasColumnType("float");
-
-                    b.Property<TimeSpan?>("TotalDelayTime")
-                        .HasColumnType("time");
 
                     b.HasKey("HandiProcessId");
 
