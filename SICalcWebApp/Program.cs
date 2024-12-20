@@ -22,6 +22,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddRazorPages();
+
+builder.Services.AddScoped<IMillingProcessService, MillingProcessService>();
 builder.Services.AddScoped<IMachineProcessService, MachineProcessService>();
 builder.Services.AddScoped<IDryerService, DryerService>();
 builder.Services.AddScoped<ITPDInfoService, TPDInfoService>();

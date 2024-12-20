@@ -17,5 +17,7 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         public List<string> HandiTypes { get; set; }
         public List<string> StaffNames { get; set; }
         public List<string> MillBunkers { get; set; }
+
+        public List<string> SortexBunker { get; set; }
     }
 }

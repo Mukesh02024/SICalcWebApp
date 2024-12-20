@@ -153,13 +153,19 @@ namespace SICalcWebApp.Areas.RiceMill.Services
               .Select(s => s.MillBName)
               .ToListAsync();
 
+            var SortexBunkers = await _context.SortexBunkers
+              .Select(s => s.SortexBName)
+              .ToListAsync();
+
             return new MasterDataViewModel
             {
                 ProcessTypes = processTypes, // Update to plain lists
                 PaddyTypes = paddyTypes,
                 HandiTypes = handiTypes,
                 StaffNames = staffNames,
-                MillBunkers= MillBunkers
+                MillBunkers= MillBunkers,
+                SortexBunker=SortexBunkers
+
             };
 
 
