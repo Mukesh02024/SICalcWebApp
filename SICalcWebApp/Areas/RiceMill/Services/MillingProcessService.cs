@@ -93,5 +93,61 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
+
+        public async Task EndProcessAsync(string batchId , string SortexBunker)
+        {
+            var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+            if (process != null)
+            {
+                // Check if the process is paused
+                if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
+                {
+                    // Calculate delay as the difference between EndTime (current time) and PauseTime
+                    var additionalDelay = DateTime.Now - process.PauseTime.Value;
+
+                    // Add the additional delay to the total delay time
+                    process.TotalDelayTime = (process.TotalDelayTime ?? TimeSpan.Zero) + additionalDelay;
+
+                    // Reset PauseTime since the process is ending
+                    process.PauseTime = null;
+                }
+
+                // Update the end details after handling pause-related calculations
+                process.EndTime = DateTime.Now;
+                process.SortexBunkerName = SortexBunker;
+                process.ProcessStatus = "Completed";
+
+                _context.MillingProcesses.Update(process);
+                await _context.SaveChangesAsync();
+            }
+
+            //var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+            //if (process != null)
+            //{
+            //    process.EndTime = DateTime.Now;
+            //    process.SortexBunkerName = SortexBunker;
+
+            //    process.ProcessStatus = "Completed";
+            //    await _context.SaveChangesAsync();
+            //}
+        }
+
+        public async Task<MillingProcess> GetActiveProcessAsync()
+        {
+            //// Find the process with "In Progress" status
+            //return await _context.HandiProcesses
+            //    .Where(h => h.ProcessStatus == "In Progress")
+            //    .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
+            //    .FirstOrDefaultAsync();
+
+            return await _context.MillingProcesses
+        .Where(h => h.ProcessStatus == "In Progress" || h.ProcessStatus == "Paused")
+        .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
+        .FirstOrDefaultAsync();
+        }
+
+
+
+
     }
 }

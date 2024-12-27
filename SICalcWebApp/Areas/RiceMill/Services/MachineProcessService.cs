@@ -122,10 +122,29 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             var process = await _context.HandiProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
+                // Check if the process is paused
+                if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
+                {
+                    // Calculate delay as the difference between EndTime (current time) and PauseTime
+                    var additionalDelay = DateTime.Now - process.PauseTime.Value;
+
+                    // Add the additional delay to the total delay time
+                    process.TotalDelayTime = (process.TotalDelayTime ?? TimeSpan.Zero) + additionalDelay;
+
+                    // Reset PauseTime since the process is ending
+                    process.PauseTime = null;
+                }
+
+                // Update the end details after handling pause-related calculations
                 process.EndTime = DateTime.Now;
                 process.ProcessStatus = "Completed";
+
+                _context.HandiProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
+
+
+
         }
 
 

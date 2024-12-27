@@ -23,6 +23,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddScoped<ISortexService, SortexService>();
+
 builder.Services.AddScoped<IMillingProcessService, MillingProcessService>();
 builder.Services.AddScoped<IMachineProcessService, MachineProcessService>();
 builder.Services.AddScoped<IDryerService, DryerService>();

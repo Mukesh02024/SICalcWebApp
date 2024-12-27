@@ -23,12 +23,16 @@ namespace SICalcWebApp.Areas.RiceMill.VM
 
         public decimal GrandTotal { get; set; } // Grand Total of all Total Costs
                                                 // Added Dictionary to store GroupName and Total Costs
-        //public Dictionary<string, decimal> GroupedSummary { get; set; }
+                                                //public Dictionary<string, decimal> GroupedSummary { get; set; }
 
-
+        public decimal GrandTotalQuantity { get; set; }
 
         public Dictionary<string, Dictionary<string, decimal>> GroupedSummary { get; set; }
 
-        public Dictionary<string, decimal> GroupedQuantities { get; set; } // Add this property for quantity sums
+        //public Dictionary<string, decimal> GroupedQuantities { get; set; } // Add this property for quantity sums
+
+        public Dictionary<string, Dictionary<string, decimal>> GroupedQuantities { get; set; }  // Ensure it's this type
+
+
     }
 }

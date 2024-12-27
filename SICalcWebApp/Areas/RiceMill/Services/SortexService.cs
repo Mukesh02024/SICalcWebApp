@@ -4,24 +4,23 @@ using SICalcWebApp.Data;
 
 namespace SICalcWebApp.Areas.RiceMill.Services
 {
-    public class DryerService:IDryerService
+    public class SortexService:ISortexService
     {
         private readonly ApplicationDbContext _context;
-        public DryerService(ApplicationDbContext context)
+        public SortexService(ApplicationDbContext context)
         {
             _context = context;
         }
-
-        public async Task<List<string>> GetAvailableBatchesForDryerAsync()
+        public async Task<List<string>> GetAvailableBatchesForSortexAsync()
         {
             // Fetch completed batch IDs from HandiProcess
-            var handiCompletedBatchIds = await _context.HandiProcesses
+            var handiCompletedBatchIds = await _context.MillingProcesses
                 .Where(hp => hp.ProcessStatus == "Completed")
                 .Select(hp => hp.BatchId)
                 .ToListAsync();
 
-            // Fetch batch IDs already in DryerProcess
-            var dryerBatchIds = await _context.DryerProcesses
+            // Fetch batch IDs already in Milling Process
+            var dryerBatchIds = await _context.SortexProcesses
                 .Select(dp => dp.BatchId)
                 .ToListAsync();
 
@@ -30,20 +29,19 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
-
-        public async Task StartDryerProcessAsync(DryerProcess DryerProcess)
+        public async Task StartSortexProcessAsync(SortexProcess sortexProcess)
         {
-            _context.DryerProcesses.Add(DryerProcess);
+            _context.SortexProcesses.Add(sortexProcess);
             await _context.SaveChangesAsync();
         }
 
 
 
-        public async Task<DryerProcess?> GetDryerProcessAsync(string batchId)
-        {
-            return await _context.DryerProcesses.FirstOrDefaultAsync(h => h.BatchId == batchId);
-        }
 
+        public async Task<SortexProcess?> GetSortexProcessAsync(string batchId)
+        {
+            return await _context.SortexProcesses.FirstOrDefaultAsync(h => h.BatchId == batchId);
+        }
 
 
 
@@ -51,23 +49,22 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         public async Task PauseProcessAsync(string batchId, string pauseReason)
         {
-            var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+            var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "Paused";
                 process.PauseReason = pauseReason;
                 process.PauseTime = DateTime.Now;
 
-                _context.DryerProcesses.Update(process);
+                _context.SortexProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
-
         public async Task ResumeProcessAsync(string batchId)
         {
-    
 
-            var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+
+            var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "In Progress";
@@ -86,18 +83,19 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                     process.ResumeTime = null;
                 }
 
-                _context.DryerProcesses.Update(process);
+                _context.SortexProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
 
         }
 
+
+
         public async Task EndProcessAsync(string batchId)
         {
-            var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+            var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
-                // Check if the process is paused
                 if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
                 {
                     // Calculate delay as the difference between EndTime (current time) and PauseTime
@@ -111,18 +109,15 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 }
 
                 // Update the end details after handling pause-related calculations
-                process.UnloadTime = DateTime.Now;
+                process.EndTime = DateTime.Now;
                 process.ProcessStatus = "Completed";
 
-                _context.DryerProcesses.Update(process);
+                _context.SortexProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
 
-
-
-
-        public async Task<DryerProcess> GetActiveProcessAsync()
+        public async Task<SortexProcess> GetActiveProcessAsync()
         {
             //// Find the process with "In Progress" status
             //return await _context.HandiProcesses
@@ -130,13 +125,11 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             //    .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
             //    .FirstOrDefaultAsync();
 
-            return await _context.DryerProcesses
+            return await _context.SortexProcesses
         .Where(h => h.ProcessStatus == "In Progress" || h.ProcessStatus == "Paused")
-        .OrderByDescending(h => h.LoadTime) // Optionally, get the most recent active process
+        .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
         .FirstOrDefaultAsync();
         }
-
-
 
 
     }

@@ -21,12 +21,12 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
         // GET: Dryer Initial Form
         public async Task<IActionResult> MillingMachine()
         {
-            //var activeProcess = await _dryerService.GetActiveProcessAsync();
-            //if (activeProcess != null)
-            //{
-            //    // If there's an active process, redirect to the Dashboard to view the active process
-            //    return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
-            //}
+            var activeProcess = await _millingProcessService.GetActiveProcessAsync();
+            if (activeProcess != null)
+            {
+                // If there's an active process, redirect to the Dashboard to view the active process
+                return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
+            }
             var availableBatches = await _millingProcessService.GetAvailableBatchesForMillAsync();
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.StaffNames = masterData.StaffNames;
@@ -156,6 +156,28 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
         }
 
+
+
+        [HttpPost]
+        public async Task<IActionResult> EndMill(string batchId, string SortexBunker)
+        {
+            if (string.IsNullOrWhiteSpace(batchId))
+            {
+                return Json(new { success = false, message = "Invalid Batch ID" });
+            }
+
+            try
+            {
+                await _millingProcessService.EndProcessAsync(batchId, SortexBunker);
+                TempData["BatchId"] = batchId; // Retain this for redirection later if needed
+                return Json(new { success = true, message = "Process ended successfully" });
+            }
+            catch (Exception ex)
+            {
+                // Log exception here
+                return Json(new { success = false, message = "An error occurred while ending the process." });
+            }
+        }
 
     }
 }

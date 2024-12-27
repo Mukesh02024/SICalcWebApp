@@ -16,10 +16,10 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         Task ResumeProcessAsync(string batchId);
 
 
-        //Task EndProcessAsync(string batchId);
+        Task EndProcessAsync(string batchId,string SortexBunker);
 
 
-        //Task<MillingProcess> GetActiveProcessAsync();
+        Task<MillingProcess> GetActiveProcessAsync();
 
     }
 }

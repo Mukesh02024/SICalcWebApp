@@ -1,5 +1,7 @@
 ﻿
-
+@*
+  this is Milling  dashboard
+*@
 
 @using SICalcWebApp.Areas.RiceMill.Utility
 @model SICalcWebApp.Areas.RiceMill.Models.MillingProcess
@@ -127,16 +129,38 @@
         }
 
         // Perform Action (Pause, Resume, End)
-        function performAction(action, batchId, pauseReason = null) {
+        function performAction(action, batchId, pauseReason = null,unloadBunker = null) {
+
+                console.log("Action:", action);
+        console.log("Batch ID:", batchId);
+        console.log("Pause Reason:", pauseReason);
+        console.log("Unload Bunker:", unloadBunker); // This should work now if unloadBunker is passed correctly
+
             const urlMap = {
                 pause: '/RiceMill/Milling/PauseMill',
                 resume: '/RiceMill/Milling/ResumeMill',
-                end: '/RiceMill/Millingr/EndMill',
+                end: '/RiceMill/Milling/EndMill',
             };
 
-            const body = pauseReason
-                ? `batchId=${encodeURIComponent(batchId)}&pauseReason=${encodeURIComponent(pauseReason)}`
-                : `batchId=${encodeURIComponent(batchId)}`;
+            // const body = pauseReason
+            //     ? `batchId=${encodeURIComponent(batchId)}&pauseReason=${encodeURIComponent(pauseReason)}`
+            //     : `batchId=${encodeURIComponent(batchId)}`;
+
+
+                // Initialize the body with batchId
+            // Initialize the body with batchId
+        let body = `batchId=${encodeURIComponent(batchId)}`;
+
+        // Add pauseReason if action is 'pause'
+        if (action === 'pause' && pauseReason) {
+            body += `&pauseReason=${encodeURIComponent(pauseReason)}`;
+        }
+
+        // Add unloadBunker if action is 'end' and unloadBunker is provided
+               if (action === 'end' && unloadBunker) {
+            body += `&SortexBunker=${encodeURIComponent(unloadBunker)}`; // Send unloadBunker as SortexBunker
+        }
+     
 
             fetch(urlMap[action], {
                 method: 'POST',
@@ -157,12 +181,18 @@
         }
 
 
-                document.getElementById("submitEndButton").addEventListener("click", function () {
+         document.getElementById("submitEndButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
-            const unloadBunker = document.getElementById("unloadBunker").value;
-            performAction('end', batchId, { unloadBunker });
+            const unloadBunker = document.getElementById("SortexBunkerName").value; // Get the value of the selected Sortex Bunker
+             console.log("Selected Sortex Bunker:", unloadBunker);
+                if (!unloadBunker) {
+            alert("Please select a Sortex Bunker.");
+            return; // Prevent the action from being performed if no bunker is selected
+        }
+         console.log("Calling performAction with action 'end' and batchId:", batchId, "unloadBunker:", unloadBunker);
+            // Call performAction with 'end', batchId, and unloadBunker as arguments
+            performAction('end', batchId, null, unloadBunker); // Pass unloadBunker as the last argument
         });
-
 
 
 

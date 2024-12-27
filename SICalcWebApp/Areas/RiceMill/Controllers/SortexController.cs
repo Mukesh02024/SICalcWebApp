@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
 using SICalcWebApp.Data;
@@ -7,94 +6,112 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Areas.RiceMill.Controllers
 {
     [Area("RiceMill")]
-    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
-    public class DryerController : Controller
+    public class SortexController : Controller
     {
         private readonly IMachineProcessService _machineProcessService;
         private readonly ApplicationDbContext _context;
-        private readonly IDryerService _dryerService;
-        public DryerController(IMachineProcessService machineProcessService, ApplicationDbContext context, IDryerService dryerService)
+        private readonly ISortexService _sortexService;
+        public SortexController(IMachineProcessService machineProcessService, ApplicationDbContext context, ISortexService sortexService)
         {
             _machineProcessService = machineProcessService;
             _context = context;
-            _dryerService = dryerService;
-        }
+            _sortexService=sortexService;
 
+        }
         // GET: Dryer Initial Form
-        public async Task<IActionResult> DryerMachine()
+        public async Task<IActionResult> SortexMachine()
         {
-            var activeProcess = await _dryerService.GetActiveProcessAsync();
+            var activeProcess = await _sortexService.GetActiveProcessAsync();
             if (activeProcess != null)
             {
                 // If there's an active process, redirect to the Dashboard to view the active process
                 return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
             }
-            var availableBatches = await _dryerService.GetAvailableBatchesForDryerAsync();
+            var availableBatches = await _sortexService.GetAvailableBatchesForSortexAsync();
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.StaffNames = masterData.StaffNames;
-            ViewBag.UnloadingBunkers = masterData.MillBunkers;
+            ViewBag.SortextBunker = masterData.SortexBunker;
             ViewBag.CompletedBatches = availableBatches;
 
-            return View(new DryerProcess()); // Use Dryer-specific view model
+            return View(new SortexProcess()); // Use Dryer-specific view model
+
         }
 
-        // POST: Start Dryer Process
+
+        // POST: Start sortex  Process
         [HttpPost]
-        public async Task<IActionResult> StartDryer(DryerProcess model)
+        public async Task<IActionResult> StartSortex(SortexProcess model)
         {
             if (!ModelState.IsValid)
             {
                 // Reload dropdowns in case of error
-                var availableBatches = await _dryerService.GetAvailableBatchesForDryerAsync();
+                var availableBatches = await _sortexService.GetAvailableBatchesForSortexAsync();
                 var masterData = await _machineProcessService.GetMasterDataAsync();
                 ViewBag.StaffNames = masterData.StaffNames;
-                ViewBag.UnloadingBunkers = masterData.MillBunkers;
+                ViewBag.SortextBunker = masterData.SortexBunker;
                 ViewBag.CompletedBatches = availableBatches;
 
                 return View(model);
             }
 
+            //var ongoingProcess = await _machineProcessService.GetActiveProcessAsync();
+            //if (ongoingProcess != null && (ongoingProcess.ProcessStatus == "In Progress" || ongoingProcess.ProcessStatus == "Paused"))
+            //{
+            //    return Json(new { success = false, message = "A process is already in progress or paused. Please wait until it completes." });
+            //}
 
-            var dryerProcess = new DryerProcess
+            // Create the Dryer process and save it to the DryerProcess table
+            var sortexProcess = new SortexProcess
             {
                 BatchId = model.BatchId,
                 StaffName = model.StaffName,
-                UnloadBunkerName = model.UnloadBunkerName,
-                DuctiPressure = model.DuctiPressure,
-                LoadTime = DateTime.Now,
+                SortexBunkerName = model.SortexBunkerName,
+                StartTime = DateTime.Now,
                 ProcessStatus = "In Progress"
             };
 
             // Save Dryer Process
-            await _dryerService.StartDryerProcessAsync(dryerProcess);
+            await _sortexService.StartSortexProcessAsync(sortexProcess);
 
             // Pass BatchId to next machine for sharing
-            TempData["BatchId"] = dryerProcess.BatchId;
+            TempData["BatchId"] = sortexProcess.BatchId;
 
-            return RedirectToAction("Dashboard", new { batchId = dryerProcess.BatchId });
+            return RedirectToAction("Dashboard", new { batchId = sortexProcess.BatchId });
         }
+
+
+
 
         // GET: Dryer Dashboard
         public async Task<IActionResult> Dashboard(string batchId)
         {
             if (string.IsNullOrEmpty(batchId))
             {
-                return RedirectToAction("DryerMachine");
+                return RedirectToAction("SortexMachine");
             }
 
-            var process = await _dryerService.GetDryerProcessAsync(batchId);
+            var process = await _sortexService.GetSortexProcessAsync(batchId);
             if (process == null)
             {
-                return RedirectToAction("Dryer");
+                return RedirectToAction("SortexMachine");
             }
 
+            //var masterData = await _machineProcessService.GetMasterDataAsync();
+            //ViewBag.SortexList = masterData.SortexBunker;
             return View(process);
         }
 
 
 
+
+
+
+
+
+
+
         [HttpPost]
-        public async Task<IActionResult> PauseDryer(string batchId, string pauseReason)
+        public async Task<IActionResult> PauseSortex(string batchId, string pauseReason)
         {
             try
             {
@@ -103,7 +120,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason))
                 {
                     // Pause the process
-                    await _dryerService.PauseProcessAsync(batchId, pauseReason);
+                    await _sortexService.PauseProcessAsync(batchId, pauseReason);
 
                     return Json(new { success = true, message = "Process Paused" });
                 }
@@ -120,7 +137,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ResumeDryer(string batchId)
+        public async Task<IActionResult> ResumeSortex(string batchId)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -129,7 +146,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _dryerService.ResumeProcessAsync(batchId);
+                await _sortexService.ResumeProcessAsync(batchId);
                 return Json(new { success = true, message = "Process resumed successfully" });
             }
             catch (Exception ex)
@@ -139,8 +156,10 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
         }
 
+
+
         [HttpPost]
-        public async Task<IActionResult> EndDryer(string batchId)
+        public async Task<IActionResult> EndSortex(string batchId)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -149,7 +168,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _dryerService.EndProcessAsync(batchId);
+                await _sortexService.EndProcessAsync(batchId);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }
@@ -159,7 +178,6 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return Json(new { success = false, message = "An error occurred while ending the process." });
             }
         }
-
 
     }
 }

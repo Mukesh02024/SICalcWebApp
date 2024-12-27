@@ -214,7 +214,6 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
 
-
         [Authorize(Roles = SD.Role_Mill_Admin + "," + SD.Role_Super_Admin + "," + SD.Role_Checker_Admin)]
         public async Task<IActionResult> PivotSummary(DateTime? fromDate, DateTime? toDate)
         {
@@ -223,13 +222,15 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 FromDate = fromDate ?? DateTime.Now.AddDays(-30), // Default to last 30 days if null
                 ToDate = toDate ?? DateTime.Now,
                 GroupedSummary = new Dictionary<string, Dictionary<string, decimal>>(),
-                GroupedQuantities = new Dictionary<string, decimal>() // Add this for quantity sums
+                GroupedQuantities = new Dictionary<string, Dictionary<string, decimal>>(), // Nested Dictionary for quantities
+                GrandTotalQuantity = 0,
             };
 
             if (fromDate.HasValue && toDate.HasValue)
             {
                 var results = await _hmaliInputService.SearchHmaliInputsAsync(fromDate, toDate, null, null);
 
+                // Group data by GroupName and ItemName, calculate total cost per item
                 viewModel.GroupedSummary = results
                     .GroupBy(r => r.GroupName)
                     .ToDictionary(
@@ -237,125 +238,32 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                         g => g.GroupBy(r => r.ItemName)
                             .ToDictionary(
                                 i => i.Key,
-                                i => i.Sum(r => r.Rate * r.Quantity)
+                                i => i.Sum(r => r.Rate * r.Quantity) // Calculate sum of total cost per item
                             )
                     );
 
-                // Calculate the sum of quantities for each group
+                // Group by GroupName, calculate total quantity for each item under each group
                 viewModel.GroupedQuantities = results
-       .GroupBy(r => r.GroupName)
-       .ToDictionary(
-           g => g.Key,
-           g => (decimal)g.Sum(r => r.Quantity) // Cast sum to decimal
-       );
+         .GroupBy(r => r.GroupName)
+         .ToDictionary(
+             g => g.Key,
+             g => g.GroupBy(r => r.ItemName)
+                 .ToDictionary(
+                     i => i.Key,
+                     i => i.Sum(r => (decimal)r.Quantity) // Cast to decimal to avoid type mismatch
+                 )
+         );
 
+                // Calculate Grand Total for all items in the date range
                 viewModel.GrandTotal = results.Sum(r => r.Rate * r.Quantity);
+
+                viewModel.GrandTotalQuantity = results.Sum(r => r.Quantity);
             }
 
             return View("PivotSummary", viewModel);
         }
 
 
-
-
-
-
-
-
-        //[Authorize(Roles = SD.Role_Mill_Admin + "," + SD.Role_Super_Admin + "," + SD.Role_Checker_Admin)]
-        //public async Task<IActionResult> PivotSummary(DateTime? fromDate, DateTime? toDate)
-        //{
-        //    var viewModel = new HmaliSearchViewModel
-        //    {
-        //        FromDate = fromDate ?? DateTime.Now, // Set default value when null
-        //        ToDate = toDate ?? DateTime.Now,     // Set default value when null
-        //        GroupedSummary = new Dictionary<string, Dictionary<string, decimal>>()
-        //    };
-
-        //    if (fromDate.HasValue && toDate.HasValue)
-        //    {
-        //        var results = await _hmaliInputService.SearchHmaliInputsAsync(fromDate, toDate, null, null);
-
-        //        viewModel.GroupedSummary = results
-        //            .GroupBy(r => r.GroupName)
-        //            .ToDictionary(
-        //                g => g.Key,
-        //                g => g.GroupBy(r => r.ItemName)
-        //                    .ToDictionary(
-        //                        i => i.Key,
-        //                        i => i.Sum(r => r.Rate * r.Quantity)
-        //                    )
-        //            );
-
-        //        viewModel.GrandTotal = results.Sum(r => r.Rate * r.Quantity);
-        //    }
-
-        //    return View("PivotSummary", viewModel);
-        //}
-
-
-
-
-
-
-
-
-
-        //[Authorize(Roles = SD.Role_Mill_Admin + "," + SD.Role_Super_Admin)]
-        //public async Task<IActionResult> Search(DateTime? fromDate, DateTime? toDate, int? groupId, int? ItemNumber)
-        //{
-        //    // Get all groups and convert to List<SelectListItem>
-        //    var groups = await _hmaliInputService.GetGroupsAsync();
-        //    var groupSelectListItems = groups.Select(g => new SelectListItem
-        //    {
-        //        Value = g.GroupId.ToString(),
-        //        Text = g.GroupName
-        //    }).ToList();
-
-        //    var viewModel = new HmaliSearchViewModel
-        //    {
-        //        Groups = groupSelectListItems, // Change to List<SelectListItem>
-        //        Items = new List<SelectListItem>(), // Initially empty
-        //        SearchResults = new List<HmaliInput>()
-        //    };
-
-        //    // Populate Items dropdown if GroupId is selected
-        //    if (groupId.HasValue)
-        //    {
-        //        var items = await _hmaliInputService.GetItemsByGroupAsync(groupId.Value);
-        //        viewModel.Items = items.Select(i => new SelectListItem
-        //        {
-        //            Value = i.ItemNumber.ToString(),
-        //            Text = i.ItemName
-        //        }).ToList();
-        //    }
-
-        //    // If dates are provided, search for records
-        //    if (fromDate.HasValue && toDate.HasValue)
-        //    {
-        //        // If Group is selected, include it in the filter
-        //        if (groupId.HasValue && ItemNumber.HasValue)
-        //        {
-        //            var results = await _hmaliInputService.SearchHmaliInputsAsync(fromDate, toDate, groupId, ItemNumber);
-        //            viewModel.SearchResults = results.ToList();
-        //        }
-        //        else if (groupId.HasValue)
-        //        {
-        //            var results = await _hmaliInputService.SearchHmaliInputsAsync(fromDate, toDate, groupId, null);
-        //            viewModel.SearchResults = results.ToList();
-        //        }
-        //        else
-        //        {
-        //            var results = await _hmaliInputService.SearchHmaliInputsAsync(fromDate, toDate, null, null);
-        //            viewModel.SearchResults = results.ToList();
-        //        }
-
-        //        // Calculate grand total for the search results
-        //        viewModel.GrandTotal = viewModel.SearchResults.Sum(r => r.Rate * r.Quantity);
-        //    }
-
-        //    return View(viewModel);
-        //}
 
         [Authorize(Roles = SD.Role_Mill_Admin + "," + SD.Role_Mill_Supervisor + "," + SD.Role_Super_Admin)]
         public async Task<IActionResult> List()

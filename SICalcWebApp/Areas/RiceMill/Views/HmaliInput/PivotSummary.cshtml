@@ -1,41 +1,40 @@
 ﻿
-    @model SICalcWebApp.Areas.RiceMill.VM.HmaliSearchViewModel
+
+
+@model SICalcWebApp.Areas.RiceMill.VM.HmaliSearchViewModel
 
 <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h2 class="h4 mb-0">Pivot Table Summary</h2>
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h2 class="h4 mb-0" >Hamali Summary Report</h2>
+        @if (Model.GroupedSummary != null && Model.GroupedSummary.Any())
+        {
+            <button id="printButton" class="btn btn-light btn-sm">
+                <i class="fas fa-print me-2"></i>Print
+            </button>
+        }
     </div>
-
 
     <div class="card-body">
         <!-- Search Form -->
         <form asp-action="PivotSummary" method="get" class="mb-4">
             <div class="row g-3 align-items-center">
-                <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="col-lg-4 col-md-6 mb-3">
                     <label for="fromDate" class="form-label">From Date:</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                        <input type="date"
-                               name="fromDate"
-                               id="fromDate"
-                               class="form-control"
-                               value="@Model.FromDate.ToString("yyyy-MM-dd")"
-                               required />
+                        <input type="date" name="fromDate" id="fromDate" class="form-control"
+                               value="@Model.FromDate.ToString("yyyy-MM-dd")" required />
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-4 mb-3">
+                <div class="col-lg-4 col-md-6 mb-3">
                     <label for="toDate" class="form-label">To Date:</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                        <input type="date"
-                               name="toDate"
-                               id="toDate"
-                               class="form-control"
-                               value="@Model.ToDate.ToString("yyyy-MM-dd")"
-                               required />
+                        <input type="date" name="toDate" id="toDate" class="form-control"
+                               value="@Model.ToDate.ToString("yyyy-MM-dd")" required />
                     </div>
                 </div>
-                <div class="col-12 col-md-4 mb-3 d-flex align-items-end">
+                <div class="col-lg-4 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search me-2"></i>Search
                     </button>
@@ -43,389 +42,148 @@
             </div>
         </form>
 
-
-
-
-        @if (Model.GroupedSummary != null && Model.GroupedSummary.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 60%">Group Name / Item Name</th>
-                            <th style="width: 20%">Sum of Total Cost</th>
-                            <th style="width: 20%">Total Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in Model.GroupedSummary)
-                        {
-                            var sanitizedGroupKey = group.Key.Replace(" ", "-").Replace(".", "").Replace(",", "");
-                            <!-- Group Row -->
-                            <tr class="group-header">
-                                <td>
-                                    <button type="button"
-                                            class="btn btn-link toggle-button text-decoration-none"
-                                            data-target="#group-@sanitizedGroupKey">
-                                        <i class="fas fa-chevron-right toggle-icon me-2"></i>
-                                        <strong>@group.Key</strong>
-                                    </button>
-                                </td>
-                                <td class="text-end">
-                                    <strong>@group.Value.Sum(i => i.Value).ToString("N2")</strong>
-                                </td>
-                                <td class="text-end">
-                                    <strong>@Model.GroupedQuantities[group.Key].ToString("N2")</strong> <!-- Display total quantity -->
-                                </td>
+        <div id="printableArea">
+            @if (Model.GroupedSummary != null && Model.GroupedSummary.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered ">
+                        <thead class="table-dark " style="background-color:black">
+                            <tr style="background-color:black">
+                                <th style="width: 60%; background-color:black" >Group Name / Item Name</th>
+                                <th class="text-end text-center align-middle" style="width: 20%">Sum of Total Cost</th>
+                                <th class="text-end text-center align-middle" style="width: 20%">Total Quantity</th>
                             </tr>
-                            <!-- Items under the group -->
-                            <tr id="group-@sanitizedGroupKey" class="group-items" style="display:none;">
-                                <td colspan="3" class="p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm mb-0 table-striped">
+                        </thead>
+                        <tbody>
+                            @foreach (var group in Model.GroupedSummary)
+                            {
+                                var sanitizedGroupKey = group.Key.Replace(" ", "-").Replace(".", "").Replace(",", "");
+                                <!-- Group Row -->
+                                <tr class="group-header">
+                                    <td style="width: 60%">
+                                        <button type="button" class="btn btn-dark toggle-button text-decoration-none"
+                                                data-target="#group-@sanitizedGroupKey">
+                                            <i class="fas fa-chevron-right toggle-icon me-2"></i>
+                                            <strong>@group.Key</strong>
+                                        </button>
+                                    </td>
+                                    <td class="text-end text-center align-middle" style="width: 20%">
+                                        <strong>@group.Value.Sum(i => i.Value).ToString("N2")</strong>
+                                    </td>
+                                    <td class="text-end text-center align-middle" style="width: 20%">
+                                        <strong>@Model.GroupedQuantities[group.Key].Sum(q => q.Value).ToString("N2")</strong>
+                                    </td>
+                                </tr>
+                                <!-- Items under the group -->
+                                <tr id="group-@sanitizedGroupKey" class="group-items" style="display:none;">
+                                    <td colspan="3" class="p-0">
+                                        <table class="table table-sm mb-0 table-striped ">
                                             @foreach (var item in group.Value)
                                             {
                                                 <tr>
-                                                    <td style="padding-left: 2.5rem;">@item.Key</td>
-                                                    <td class="text-end">@item.Value.ToString("N2")</td>
-                                                    @* <td class="text-end">@Model.GroupedQuantities[group.Key].ToString("N2")</td> <!-- Display total quantity --> *@
+                                                    <td style="width: 60%">@item.Key</td>
+                                                    <td class="text-end text-center align-middle" style="width: 20% ">@item.Value.ToString("N2")</td>
+                                                    <td class="text-end text-center align-middle" style="width: 20%">@Model.GroupedQuantities[group.Key][item.Key].ToString("N2")</td>
                                                 </tr>
                                             }
                                         </table>
-                                    </div>
+                                    </td>
+                                </tr>
+                            }
+
+
+                            <tr class="group-header" style="background-color:powderblue">
+                                <td style="width: 60%">
+
+                                    <h5 class="mb-2">Grand Total</h5>
+
+                                </td>
+                                <td class="text-end text-center align-middle" style="width: 20%">
+
+
+                                    <h4 class="mb-0  text-center align-middle "> <strong>  @Model.GrandTotal.ToString("N2") </strong></h4>
+                                   
+                                
+
+                                <td class="text-end" style="width: 20%">
+
+                                    <h4 class="mb-0  text-center align-middle"> <strong>@Model.GrandTotalQuantity.ToString("N2")</strong></h4>
+
                                 </td>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
 
-            <!-- Grand Total Card -->
-            <div class="card bg-light mt-3">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Grand Total:</h4>
-                    <h4 class="mb-0 text-primary">
-                        @Model.GroupedSummary.Sum(g => g.Value.Sum(i => i.Value)).ToString("N2")
-                    </h4>
+
+
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>No data found for the selected date range.
-            </div>
-        }
+
+               
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i>No data found for the selected date range.
+                </div>
+            }
+        </div>
     </div>
 
-    <!-- Custom CSS -->
-    <style>
-        .toggle-button {
-            color: var(--bs-primary);
-            padding: 0.25rem 0.5rem;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            text-align: left;
-        }
-
-            .toggle-button:hover {
-                background-color: rgba(0, 123, 255, 0.1);
-                border-radius: 4px;
-            }
-
-            .toggle-button .toggle-icon {
-                transition: transform 0.2s ease-in-out;
-                font-size: 0.875rem;
-            }
-
-            .toggle-button.active .toggle-icon {
-                transform: rotate(90deg);
-            }
-
-        .group-header {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        .group-items table {
-            background-color: white;
-        }
-
-        .card-body {
-            padding: 1rem;
-        }
-
-        .group-items td {
-            font-size: 0.9rem;
-        }
-
-        /* Date input styling */
-        input[type="date"] {
-            min-height: 38px;
-        }
-
-        .input-group-text {
-            background-color: #f8f9fa;
-        }
-    </style>
-
-    <!-- Enhanced Toggle Script -->
     <script>
-        $(document).ready(function () {
-            $('.toggle-button').click(function (e) {
-                e.preventDefault();
-                var $this = $(this);
-                var target = $this.data('target');
-
-                // Toggle visibility with animation
-                $(target).slideToggle(200);
-
-                // Toggle active state and icon
-                $this.toggleClass('active');
-
-                // Save state to localStorage
-                localStorage.setItem(target, $(target).is(':visible') ? 'show' : 'hide');
-            });
-
-            // Restore previous state
-            $('.toggle-button').each(function () {
-                var target = $(this).data('target');
-                var state = localStorage.getItem(target);
-
-                if (state === 'show') {
-                    $(target).show();
-                    $(this).addClass('active');
-                }
-            });
-
-            // Initialize date inputs with current date range if not set
-            if (!$('#fromDate').val()) {
-                var today = new Date();
-                var thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(today.getDate() - 30);
-
-                $('#fromDate').val(thirtyDaysAgo.toISOString().split('T')[0]);
-                $('#toDate').val(today.toISOString().split('T')[0]);
-            }
-
-            // Validate date range
-            $('form').on('submit', function (e) {
-                var fromDate = new Date($('#fromDate').val());
-                var toDate = new Date($('#toDate').val());
-
-                if (fromDate > toDate) {
-                    e.preventDefault();
-                    alert('From date cannot be later than To date');
-                    return false;
-                }
-            });
-        });
-    </script>
 
 
-
-
-
-
-
-        <!-- Pivot Table -->
-       @*  @if (Model.GroupedSummary != null && Model.GroupedSummary.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 60%">Group Name / Item Name</th>
-                            <th style="width: 20%">Sum of Total Cost</th>
-                            <th style="width: 20%">Total Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in Model.GroupedSummary)
-                        {
-                            var sanitizedGroupKey = group.Key.Replace(" ", "-").Replace(".", "").Replace(",", "");
-                            <!-- Group Row -->
-                            <tr class="group-header">
-                                <td>
-                                    <button type="button"
-                                            class="btn btn-link toggle-button text-decoration-none"
-                                            data-target="#group-@sanitizedGroupKey">
-                                        <i class="fas fa-chevron-right toggle-icon me-2"></i>
-                                        <strong>@group.Key</strong>
-                                    </button>
-                                </td>
-                                <td class="text-end">
-                                    <strong>@group.Value.Sum(i => i.Value).ToString("N2")</strong>
-                                </td>
-                                <td class="text-end">
-                                    <strong>@Model.GroupedQuantities[group.Key].ToString("N2")</strong> <!-- Display total quantity -->
-                                </td>
-                            </tr>
-                            <!-- Items under the group -->
-                            <tr id="group-@sanitizedGroupKey" class="group-items" style="display:none;">
-                                <td colspan="3" class="p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm mb-0 table-striped">
-                                            @foreach (var item in group.Value)
-                                            {
-                                                <tr>
-                                                    <td style="padding-left: 2.5rem;">@item.Key</td>
-                                                    <td class="text-end">@item.Value.ToString("N2")</td>
-                                                    <td class="text-end">N/A</td> <!-- Placeholder, no individual quantity shown here -->
-                                                </tr>
-                                            }
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Grand Total Card -->
-            <div class="card bg-light mt-3">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Grand Total:</h4>
-                    <h4 class="mb-0 text-primary">
-                        @Model.GroupedSummary.Sum(g => g.Value.Sum(i => i.Value)).ToString("N2")
-                    </h4>
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle me-2"></i>No data found for the selected date range.
-            </div>
-        }
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-
-<!-- Custom CSS -->
-<style>
-    .toggle-button {
-        color: var(--bs-primary);
-        padding: 0.25rem 0.5rem;
-        display: flex;
-        align-items: center;
-        width: 100%;
-        text-align: left;
-    }
-
-    .toggle-button:hover {
-        background-color: rgba(0, 123, 255, 0.1);
-        border-radius: 4px;
-    }
-
-    .toggle-button .toggle-icon {
-        transition: transform 0.2s ease-in-out;
-        font-size: 0.875rem;
-    }
-
-    .toggle-button.active .toggle-icon {
-        transform: rotate(90deg);
-    }
-
-    .group-header {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-
-    .group-items table {
-        background-color: white;
-    }
-
-
-
-        .card-body {
-            padding: 1rem;
-        }
-
-        .toggle-button {
-            font-size: 0.9rem;
-        }
-
-        .group-items td {
-            font-size: 0.9rem;
-        }
-    }
-
-    /* Date input styling */
-    input[type="date"] {
-        min-height: 38px;
-    }
-
-    .input-group-text {
-        background-color: #f8f9fa;
-    }
-</style>
-
-<!-- Enhanced Toggle Script -->
-<script>
-    $(document).ready(function () {
-        $('.toggle-button').click(function (e) {
-            e.preventDefault();
+          $(document).ready(function () {
+        $('.toggle-button').click(function () {
             var $this = $(this);
             var target = $this.data('target');
-            
-            // Toggle visibility with animation
+            var icon = $this.find('.toggle-icon');
+
+            // Toggle the visibility of the target row
             $(target).slideToggle(200);
-            
-            // Toggle active state and icon
             $this.toggleClass('active');
-            
-            // Save state to localStorage
+
+            // Update the icon direction
+            if (icon.hasClass('fa-chevron-right')) {
+                icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+            } else {
+                icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
+            }
+
+            // Store the state in localStorage
             localStorage.setItem(target, $(target).is(':visible') ? 'show' : 'hide');
         });
 
-        // Restore previous state
-        $('.toggle-button').each(function() {
-            var target = $(this).data('target');
+        // Restore state from localStorage
+        $('.toggle-button').each(function () {
+            var $this = $(this);
+            var target = $this.data('target');
+            var icon = $this.find('.toggle-icon');
             var state = localStorage.getItem(target);
-            
+
             if (state === 'show') {
                 $(target).show();
-                $(this).addClass('active');
+                $this.addClass('active');
+                icon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
+            } else {
+                icon.removeClass('fa-chevron-down').addClass('fa-chevron-right');
             }
         });
 
-        // Initialize date inputs with current date range if not set
-        if (!$('#fromDate').val()) {
-            var today = new Date();
-            var thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(today.getDate() - 30);
-            
-            $('#fromDate').val(thirtyDaysAgo.toISOString().split('T')[0]);
-            $('#toDate').val(today.toISOString().split('T')[0]);
-        }
 
-        // Validate date range
-        $('form').on('submit', function(e) {
-            var fromDate = new Date($('#fromDate').val());
-            var toDate = new Date($('#toDate').val());
-            
-            if (fromDate > toDate) {
-                e.preventDefault();
-                alert('From date cannot be later than To date');
-                return false;
-            }
+
+
+
+            $('#printButton').click(function () {
+                var printContents = $('#printableArea').html();
+                var dateRange = `<div class="text-center"><h4> Hamali Summary Report From: @Model.FromDate.ToString("yyyy-MM-dd") To: @Model.ToDate.ToString("yyyy-MM-dd")</h4></div>`;
+                printContents = dateRange + printContents;
+
+                var originalContents = document.body.innerHTML;
+                document.body.innerHTML = printContents;
+                window.print();
+                document.body.innerHTML = originalContents;
+                location.reload();
+            });
         });
-    });
-</script> *@
+    </script>
+</div>

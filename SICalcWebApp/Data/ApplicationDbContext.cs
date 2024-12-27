@@ -54,6 +54,7 @@ namespace SICalcWebApp.Data
 
         public DbSet<MillingProcess> MillingProcesses { get; set; }
 
+        public DbSet<SortexProcess> SortexProcesses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
        
