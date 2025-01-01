@@ -92,12 +92,40 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         }
 
-        public async Task EndProcessAsync(string batchId)
+        //public async Task EndProcessAsync(string batchId, string UnloadBunkers)
+        //{
+        //    var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
+        //    if (process != null)
+        //    {
+        //        // Check if the process is paused
+        //        if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
+        //        {
+        //            // Calculate delay as the difference between EndTime (current time) and PauseTime
+        //            var additionalDelay = DateTime.Now - process.PauseTime.Value;
+
+        //            // Add the additional delay to the total delay time
+        //            process.TotalDelayTime = (process.TotalDelayTime ?? TimeSpan.Zero) + additionalDelay;
+
+        //            // Reset PauseTime since the process is ending
+        //            process.PauseTime = null;
+        //        }
+
+        //        // Update the end details after handling pause-related calculations
+        //        process.UnloadTime = DateTime.Now;
+        //        process.UnloadBunkerName = UnloadBunkers;
+        //        process.ProcessStatus = "Completed";
+
+        //        _context.DryerProcesses.Update(process);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
+        public async Task EndProcessAsync(string batchId, string UnloadBunkers)
         {
+            // Fetch the DryerProcess based on the BatchId
             var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
-                // Check if the process is paused
+                // Check if the process is paused and handle delay
                 if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
                 {
                     // Calculate delay as the difference between EndTime (current time) and PauseTime
@@ -112,13 +140,24 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
                 // Update the end details after handling pause-related calculations
                 process.UnloadTime = DateTime.Now;
+                process.UnloadBunkerName = UnloadBunkers;
                 process.ProcessStatus = "Completed";
 
+                // Fetch the selected bunker and update its status to "OCCUPIED"
+                var bunker = await _context.MillBunkers.FirstOrDefaultAsync(b => b.MillBName == UnloadBunkers);
+                if (bunker != null)
+                {
+                    bunker.Status = "OCCUPIED"; // Mark the bunker as occupied
+                    _context.MillBunkers.Update(bunker); // Update the bunker status
+                }
+
+                // Update the DryerProcess in the database
                 _context.DryerProcesses.Update(process);
+
+                // Save all changes to the database
                 await _context.SaveChangesAsync();
             }
         }
-
 
 
 
@@ -137,7 +176,22 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
+        public async Task<bool> IsAnyBunkerEmptyAsync()
+        {
+            var emptyBunkers = await _context.MillBunkers
+                .Where(b => b.Status == "EMPTY")
+                .ToListAsync();
 
+            return emptyBunkers.Any();
+        }
+
+        public async Task<List<string>> GetEmptyBunkersAsync()
+        {
+            return await _context.MillBunkers
+                .Where(b => b.Status == "EMPTY")
+                .Select(b => b.MillBName)
+                .ToListAsync();
+        }
 
     }
 }

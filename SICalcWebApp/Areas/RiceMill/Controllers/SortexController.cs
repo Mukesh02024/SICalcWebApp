@@ -27,15 +27,32 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 // If there's an active process, redirect to the Dashboard to view the active process
                 return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
             }
-            var availableBatches = await _sortexService.GetAvailableBatchesForSortexAsync();
+
+            var occupiedSortexBunkers = await _sortexService.GetOccupiedSortexBunkersAsync();
+            ViewBag.SortexBunkers = occupiedSortexBunkers;
+           
+    
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.StaffNames = masterData.StaffNames;
-            ViewBag.SortextBunker = masterData.SortexBunker;
-            ViewBag.CompletedBatches = availableBatches;
+
 
             return View(new SortexProcess()); // Use Dryer-specific view model
 
         }
+
+
+        [HttpPost]
+        public async Task<JsonResult> GetBatchIds(string sortexBunkerName)
+        {
+            if (string.IsNullOrEmpty(sortexBunkerName))
+            {
+                return Json(new List<string>());
+            }
+
+            var batchIds = await _sortexService.GetBatchIdsForSortexAsync(sortexBunkerName);
+            return Json(batchIds);
+        }
+
 
 
         // POST: Start sortex  Process
@@ -45,22 +62,16 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             if (!ModelState.IsValid)
             {
                 // Reload dropdowns in case of error
-                var availableBatches = await _sortexService.GetAvailableBatchesForSortexAsync();
+                var occupiedSortexBunkers = await _sortexService.GetOccupiedSortexBunkersAsync();
+                ViewBag.SortexBunkers = occupiedSortexBunkers;
                 var masterData = await _machineProcessService.GetMasterDataAsync();
                 ViewBag.StaffNames = masterData.StaffNames;
-                ViewBag.SortextBunker = masterData.SortexBunker;
-                ViewBag.CompletedBatches = availableBatches;
+               
 
                 return View(model);
             }
 
-            //var ongoingProcess = await _machineProcessService.GetActiveProcessAsync();
-            //if (ongoingProcess != null && (ongoingProcess.ProcessStatus == "In Progress" || ongoingProcess.ProcessStatus == "Paused"))
-            //{
-            //    return Json(new { success = false, message = "A process is already in progress or paused. Please wait until it completes." });
-            //}
-
-            // Create the Dryer process and save it to the DryerProcess table
+            
             var sortexProcess = new SortexProcess
             {
                 BatchId = model.BatchId,

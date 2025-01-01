@@ -1,4 +1,5 @@
-﻿using SICalcWebApp.Areas.RiceMill.Models;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using SICalcWebApp.Areas.RiceMill.Models;
 
 namespace SICalcWebApp.Areas.RiceMill.Services
 {
@@ -20,6 +21,20 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
         Task<MillingProcess> GetActiveProcessAsync();
+
+        Task<List<SelectListItem>> GetOccupiedBunkersAsync();
+        Task<List<SelectListItem>> GetBatchesForOccupiedBunkerAsync(string occupiedBunkerName);
+
+
+
+        Task<MillBunker> GetBunkerByNameAsync(string bunkerName);
+        Task UpdateBunkerStatusAsync(MillBunker bunker);
+
+        Task<bool> IsAnyBunkerSortexEmptyAsync();
+        Task<List<string>> GetEmptySortexBunkersAsync();
+
+
+    
 
     }
 }

@@ -27,13 +27,40 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             // Return batch IDs completed in HandiProcess but not in DryerProcess
             return handiCompletedBatchIds.Except(dryerBatchIds).ToList();
         }
-
-
-        public async Task StartSortexProcessAsync(SortexProcess sortexProcess)
+        public async Task StartSortexProcessAsync(SortexProcess process)
         {
-            _context.SortexProcesses.Add(sortexProcess);
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Add the Sortex process to the database
+                _context.SortexProcesses.Add(process);
+                await _context.SaveChangesAsync();
+
+                // Update the related Sortex bunker's status
+                var bunker = await _context.SortexBunkers.FirstOrDefaultAsync(sb => sb.SortexBName == process.SortexBunkerName);
+                if (bunker != null)
+                {
+                    bunker.Status = "EMPTY";
+                    await _context.SaveChangesAsync();
+                }
+
+                // Commit transaction
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // Rollback transaction in case of error
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
+
+
+        //public async Task StartSortexProcessAsync(SortexProcess sortexProcess)
+        //{
+        //    _context.SortexProcesses.Add(sortexProcess);
+        //    await _context.SaveChangesAsync();
+        //}
 
 
 
@@ -130,6 +157,33 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
         .FirstOrDefaultAsync();
         }
+
+
+
+
+        public async Task<List<string>> GetBatchIdsForSortexAsync(string sortexBunkerName)
+        {
+            var completedBatchIds = await _context.MillingProcesses
+                .Where(mp => mp.SortexBunkerName == sortexBunkerName && mp.ProcessStatus == "Completed")
+                .Select(mp => mp.BatchId)
+                .ToListAsync();
+
+            var existingBatchIds = await _context.SortexProcesses
+                .Select(sp => sp.BatchId)
+                .ToListAsync();
+
+            return completedBatchIds.Except(existingBatchIds).ToList();
+        }
+
+        public async Task<List<string>> GetOccupiedSortexBunkersAsync()
+        {
+            return await _context.SortexBunkers
+                .Where(sb => sb.Status == "OCCUPIED")
+                .Select(sb => sb.SortexBName)
+                .ToListAsync();
+        }
+
+
 
 
     }

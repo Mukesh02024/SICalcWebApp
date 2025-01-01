@@ -1,0 +1,79 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model SICalcWebApp.Areas.RiceMill.VM.MillingProcessViewModel
+
+@{
+    ViewData["Title"] = "Start Milling";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post" asp-action="StartMilling">
+    <div class="form-group">
+        <label for="MillBunkerName">Mill Bunker Name</label>
+        <select id="MillBunkerName" name="MillBunkerName" class="form-control">
+            <option value="">-- Select Bunker --</option>
+            @foreach (var bunker in Model.Bunkers)
+            {
+                <option value="@bunker.Text">@bunker.Text</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="BatchId">Batch ID</label>
+        <select id="BatchId" name="BatchId" class="form-control">
+            <option value="">-- Select Batch --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="StaffName">Staff Name</label>
+        <select id="StaffName" name="StaffName" class="form-control">
+            <option value="">-- Select Staff --</option>
+            @foreach (var staff in Model.Staffs)
+            {
+                <option value="@staff.Value">@staff.Text</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Start Milling</button>
+</form>
+
+@section Scripts {
+    <script>
+        // Use jQuery to listen for bunker selection change
+        $('#MillBunkerName').change(function () {
+            var bunkerName = $(this).val();
+            if (bunkerName) {
+                // Fetch batches based on selected bunker
+                $.ajax({
+                    url: '@Url.Action("GetBatchesForBunker", "Milling")',
+                    data: { occupiedBunkerName: bunkerName },
+                    success: function (data) {
+                        // Populate the batch dropdown with fetched batches
+                        var batchDropdown = $('#BatchId');
+                        batchDropdown.empty(); // Clear previous items
+                        batchDropdown.append('<option value="">-- Select Batch --</option>'); // Reset default option
+
+                        // Append new batch options
+                        $.each(data, function (index, batch) {
+                            batchDropdown.append('<option value="' + batch.value + '">' + batch.text + '</option>');
+                        });
+                    },
+                    error: function () {
+                        alert('Error fetching batches');
+                    }
+                });
+            } else {
+                // Clear batch dropdown if no bunker is selected
+                $('#BatchId').empty();
+                $('#BatchId').append('<option value="">-- Select Batch --</option>');
+            }
+        });
+    </script>
+}

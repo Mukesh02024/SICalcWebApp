@@ -21,5 +21,11 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         Task<SortexProcess> GetActiveProcessAsync();
 
+
+
+
+        Task<List<string>> GetOccupiedSortexBunkersAsync();
+    Task<List<string>> GetBatchIdsForSortexAsync(string sortexBunkerName);
+
     }
 }

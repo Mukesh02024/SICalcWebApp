@@ -16,5 +16,9 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         Task<HandiProcess> GetActiveProcessAsync();
 
+        Task<bool> IsDryerFreeAsync();
+
+        Task<bool> AreAllCompletedBatchesInDryerProcessAsync();
+
     }
 }

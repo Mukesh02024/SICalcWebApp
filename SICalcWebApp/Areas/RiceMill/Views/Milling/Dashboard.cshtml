@@ -1,8 +1,4 @@
 ﻿
-@*
-  this is Milling  dashboard
-*@
-
 @using SICalcWebApp.Areas.RiceMill.Utility
 @model SICalcWebApp.Areas.RiceMill.Models.MillingProcess
 
@@ -113,12 +109,33 @@
 
     <script>
 
-
-
                 function showEndForm() {
-            document.getElementById("endForm").style.display = "block";
-            document.getElementById("pauseReasonForm").style.display = "none";
+            // Check if any bunker is empty
+            fetch('/RiceMill/Milling/CheckBunkerStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // If a bunker is empty, show the "End" form
+                    document.getElementById("endForm").style.display = "block";
+                    document.getElementById("pauseReasonForm").style.display = "none";
+                } else {
+                    // Display the alert message
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error checking bunker status:", error);
+                alert("An error occurred while checking bunker status.");
+            });
         }
+
+        //         function showEndForm() {
+        //     document.getElementById("endForm").style.display = "block";
+        //     document.getElementById("pauseReasonForm").style.display = "none";
+        // }
 
 
 

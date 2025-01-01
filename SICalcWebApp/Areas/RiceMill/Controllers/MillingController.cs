@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
+using SICalcWebApp.Areas.RiceMill.VM;
 using SICalcWebApp.Data;
 
 namespace SICalcWebApp.Areas.RiceMill.Controllers
@@ -18,50 +21,44 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             _millingProcessService=millingProcessService;
             
         }
-        // GET: Dryer Initial Form
-        public async Task<IActionResult> MillingMachine()
+  
+        public async Task<IActionResult> StartMilling()
         {
             var activeProcess = await _millingProcessService.GetActiveProcessAsync();
+
             if (activeProcess != null)
             {
                 // If there's an active process, redirect to the Dashboard to view the active process
                 return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
             }
-            var availableBatches = await _millingProcessService.GetAvailableBatchesForMillAsync();
-            var masterData = await _machineProcessService.GetMasterDataAsync();
-            ViewBag.StaffNames = masterData.StaffNames;
-            ViewBag.MillBunkers = masterData.MillBunkers;
-            ViewBag.CompletedBatches = availableBatches;
 
-            return View(new MillingProcess()); // Use Dryer-specific view model
+
+            var model = new MillingProcessViewModel
+            {
+                Bunkers = await _millingProcessService.GetOccupiedBunkersAsync(),
+                Batches = new List<SelectListItem>(), // Initialize with an empty list
+                Staffs = await GetStaffList() // Populate staff list
+            };
+
+            return View(model);
         }
 
 
-
         // POST: Start Milling  Process
+
         [HttpPost]
-        public async Task<IActionResult> StartMilling (MillingProcess model)
+        public async Task<IActionResult> StartMilling(MillingProcessViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                // Reload dropdowns in case of error
-                var availableBatches = await _millingProcessService.GetAvailableBatchesForMillAsync();
-                var masterData = await _machineProcessService.GetMasterDataAsync();
-                ViewBag.StaffNames = masterData.StaffNames;
-                ViewBag.MillBunkers = masterData.MillBunkers;
-                ViewBag.CompletedBatches = availableBatches;
-
+                // Reload dropdowns if there are validation errors
+                model.Bunkers = await _millingProcessService.GetOccupiedBunkersAsync();
+                model.Staffs = await GetStaffList();
                 return View(model);
             }
 
-            //var ongoingProcess = await _machineProcessService.GetActiveProcessAsync();
-            //if (ongoingProcess != null && (ongoingProcess.ProcessStatus == "In Progress" || ongoingProcess.ProcessStatus == "Paused"))
-            //{
-            //    return Json(new { success = false, message = "A process is already in progress or paused. Please wait until it completes." });
-            //}
-
-            // Create the Dryer process and save it to the DryerProcess table
-            var MillProcess = new MillingProcess
+            // Create the MillingProcess object
+            var millingProcess = new MillingProcess
             {
                 BatchId = model.BatchId,
                 StaffName = model.StaffName,
@@ -70,19 +67,33 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 ProcessStatus = "In Progress"
             };
 
-            // Save Dryer Process
-            await _millingProcessService.StartMillProcessAsync(MillProcess);
+            // Start the milling process
+            await _millingProcessService.StartMillProcessAsync(millingProcess);
 
-            // Pass BatchId to next machine for sharing
-            TempData["BatchId"] = MillProcess.BatchId;
+            // Mark the selected bunker as 'EMPTY'
+            var bunker = await _millingProcessService.GetBunkerByNameAsync(model.MillBunkerName);
+            if (bunker != null)
+            {
+                bunker.Status = "EMPTY"; // Mark the bunker as empty after starting milling
+                await _millingProcessService.UpdateBunkerStatusAsync(bunker);
+            }
 
-            return RedirectToAction("Dashboard", new { batchId = MillProcess.BatchId });
+            // Pass the BatchId to the next machine (if necessary)
+            TempData["BatchId"] = millingProcess.BatchId;
+
+            return RedirectToAction("Dashboard", new { batchId = millingProcess.BatchId });
         }
 
 
 
 
-             // GET: Dryer Dashboard
+
+
+
+      
+
+
+        // GET: Dryer Dashboard
         public async Task<IActionResult> Dashboard(string batchId)
         {
             if (string.IsNullOrEmpty(batchId))
@@ -98,15 +109,12 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.SortexList = masterData.SortexBunker;
+
+
+            var emptyBunkers = await _millingProcessService.GetEmptySortexBunkersAsync();
+            ViewBag.SortexList = emptyBunkers; // Pass the empty bunkers to the view
             return View(process);
         }
-
-
-
-
-
-
-
 
 
 
@@ -178,6 +186,69 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return Json(new { success = false, message = "An error occurred while ending the process." });
             }
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetBatchesForBunker(string occupiedBunkerName)
+        {
+            // Ensure that occupiedBunkerName is passed correctly
+            if (string.IsNullOrEmpty(occupiedBunkerName))
+            {
+                return Json(new List<SelectListItem>());
+            }
+
+            var batches = await _millingProcessService.GetBatchesForOccupiedBunkerAsync(occupiedBunkerName);
+            return Json(batches);  // Return as JSON for use in the view
+        }
+
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CheckBunkerStatus()
+        {
+            try
+            {
+                // Check if any bunker is empty using the service
+                bool isAnyBunkerEmpty = await _millingProcessService.IsAnyBunkerSortexEmptyAsync();
+                if (!isAnyBunkerEmpty)
+                {
+                    return Json(new { success = false, message = "YOU CANNOT UNLOAD PADDY IN  SORTEX BUNKER BECAUSE ALL BUNKERS ARE OCCUPIED" });
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                Console.WriteLine(ex.Message);
+                return Json(new { success = false, message = "An error occurred while checking bunker status." });
+            }
+        }
+
+
+
+
+
+        private async Task<List<SelectListItem>> GetStaffList()
+        {
+            return await _context.Staffs
+                .Select(s => new SelectListItem
+                {
+                    Value = s.StaffName,
+                    Text = s.StaffName
+                })
+                .ToListAsync();
+        }
+
+
+
+
+
+
+
 
     }
 }

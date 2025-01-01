@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Data;
 
@@ -117,28 +118,25 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 process.SortexBunkerName = SortexBunker;
                 process.ProcessStatus = "Completed";
 
+
+                // Fetch the selected bunker and update its status to "OCCUPIED"
+                var bunker = await _context.SortexBunkers.FirstOrDefaultAsync(b => b.SortexBName == SortexBunker);
+                if (bunker != null)
+                {
+                    bunker.Status = "OCCUPIED"; // Mark the bunker as occupied
+                    _context.SortexBunkers.Update(bunker); // Update the bunker status
+                }
+
                 _context.MillingProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
 
-            //var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
-            //if (process != null)
-            //{
-            //    process.EndTime = DateTime.Now;
-            //    process.SortexBunkerName = SortexBunker;
-
-            //    process.ProcessStatus = "Completed";
-            //    await _context.SaveChangesAsync();
-            //}
+       
         }
 
         public async Task<MillingProcess> GetActiveProcessAsync()
         {
-            //// Find the process with "In Progress" status
-            //return await _context.HandiProcesses
-            //    .Where(h => h.ProcessStatus == "In Progress")
-            //    .OrderByDescending(h => h.StartTime) // Optionally, get the most recent active process
-            //    .FirstOrDefaultAsync();
+      
 
             return await _context.MillingProcesses
         .Where(h => h.ProcessStatus == "In Progress" || h.ProcessStatus == "Paused")
@@ -147,6 +145,96 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
+
+
+
+
+
+        // Method to fetch occupied bunkers
+        public async Task<List<SelectListItem>> GetOccupiedBunkersAsync()
+        {
+            var bunkers = await _context.MillBunkers
+                .Where(b => b.Status == "OCCUPIED")
+                .Select(b => new SelectListItem
+                {
+                    Value = b.MillBName, // Assuming Name is what you want to display
+                    Text = b.MillBName
+                })
+                .ToListAsync();
+
+            return bunkers;
+        }
+
+        // Method to fetch completed batches from DryerProcess based on the selected occupied bunker
+        public async Task<List<SelectListItem>> GetBatchesForOccupiedBunkerAsync(string occupiedBunkerName)
+        {
+            //var batches = await _context.DryerProcesses
+            //    .Where(dp => dp.ProcessStatus == "Completed" && dp.UnloadBunkerName == occupiedBunkerName)
+            //    .Select(dp => new SelectListItem
+            //    {
+            //        Value = dp.BatchId,
+            //        Text = $"Batch {dp.BatchId}"
+            //    })
+            //    .ToListAsync();
+
+            //return batches;
+
+            var batches = await _context.DryerProcesses
+    .Where(dp => dp.ProcessStatus == "Completed"
+                && dp.UnloadBunkerName == occupiedBunkerName
+                && !_context.MillingProcesses.Any(mp => mp.BatchId == dp.BatchId))  // Exclude batches present in MillingProcess
+    .Select(dp => new SelectListItem
+    {
+        Value = dp.BatchId.ToString(),
+        Text = $"Batch {dp.BatchId}"
+    })
+    .ToListAsync();
+
+            return batches;
+        }
+
+
+
+
+
+        // Method to get a bunker by its name
+        public async Task<MillBunker> GetBunkerByNameAsync(string bunkerName)
+        {
+            // Fetch the bunker with the given name
+            return await _context.MillBunkers
+                                 .FirstOrDefaultAsync(b => b.MillBName == bunkerName);
+        }
+
+        // Method to update the status of the bunker
+        public async Task UpdateBunkerStatusAsync(MillBunker bunker)
+        {
+            // Update the bunker status and save changes
+            _context.MillBunkers.Update(bunker);
+            await _context.SaveChangesAsync();
+        }
+
+
+
+
+
+        public async Task<bool> IsAnyBunkerSortexEmptyAsync()
+        {
+            // Check if any bunker has the status "EMPTY"
+            return await _context.SortexBunkers.AnyAsync(bunker => bunker.Status == "EMPTY");
+        }
+
+        public async Task<List<string>> GetEmptySortexBunkersAsync()
+        {
+            return await _context.SortexBunkers
+                .Where(b => b.Status == "EMPTY")
+                .Select(b => b.SortexBName)
+                .ToListAsync();
+        }
+
+
+
+
+     
 
 
     }

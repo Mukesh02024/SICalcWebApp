@@ -32,7 +32,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             var availableBatches = await _dryerService.GetAvailableBatchesForDryerAsync();
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.StaffNames = masterData.StaffNames;
-            ViewBag.UnloadingBunkers = masterData.MillBunkers;
+            //ViewBag.UnloadingBunkers = masterData.MillBunkers;
             ViewBag.CompletedBatches = availableBatches;
 
             return View(new DryerProcess()); // Use Dryer-specific view model
@@ -48,7 +48,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 var availableBatches = await _dryerService.GetAvailableBatchesForDryerAsync();
                 var masterData = await _machineProcessService.GetMasterDataAsync();
                 ViewBag.StaffNames = masterData.StaffNames;
-                ViewBag.UnloadingBunkers = masterData.MillBunkers;
+                //ViewBag.UnloadingBunkers = masterData.MillBunkers;
                 ViewBag.CompletedBatches = availableBatches;
 
                 return View(model);
@@ -59,7 +59,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             {
                 BatchId = model.BatchId,
                 StaffName = model.StaffName,
-                UnloadBunkerName = model.UnloadBunkerName,
+                //UnloadBunkerName = model.UnloadBunkerName,
                 DuctiPressure = model.DuctiPressure,
                 LoadTime = DateTime.Now,
                 ProcessStatus = "In Progress"
@@ -88,7 +88,12 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return RedirectToAction("Dryer");
             }
 
+
+            var emptyBunkers = await _dryerService.GetEmptyBunkersAsync();
+            ViewBag.SortexList = emptyBunkers; // Pass the empty bunkers to the view
+           
             return View(process);
+           
         }
 
 
@@ -140,7 +145,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EndDryer(string batchId)
+        public async Task<IActionResult> EndDryer(string batchId,string unloadBunkerName)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -149,7 +154,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _dryerService.EndProcessAsync(batchId);
+                await _dryerService.EndProcessAsync(batchId, unloadBunkerName);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }
@@ -157,6 +162,32 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             {
                 // Log exception here
                 return Json(new { success = false, message = "An error occurred while ending the process." });
+            }
+        }
+
+
+
+
+
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CheckBunkerStatus()
+        {
+            try
+            {
+                bool isAnyBunkerEmpty = await _dryerService.IsAnyBunkerEmptyAsync();
+                if (!isAnyBunkerEmpty)
+                {
+                    return Json(new { success = false, message = "YOU CANNOT UNLOAD PADDY FOR MILLING BECAUSE ALL BUNKERS ARE OCCUPIED" });
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred while checking bunker status." });
             }
         }
 

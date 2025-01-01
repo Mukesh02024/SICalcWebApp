@@ -42,7 +42,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             return View(new HandiProcess()); // Use Handi-specific view model
         }
 
-        // POST: Start Handi Process
+
 
         // POST: Start Handi Process
         [HttpPost]
@@ -171,6 +171,28 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> EndHandi(string batchId)
+        //{
+        //    if (string.IsNullOrWhiteSpace(batchId))
+        //    {
+        //        return Json(new { success = false, message = "Invalid Batch ID" });
+        //    }
+
+        //    try
+        //    {
+        //        await _machineProcessService.EndProcessAsync(batchId);
+        //        TempData["BatchId"] = batchId; // Retain this for redirection later if needed
+        //        return Json(new { success = true, message = "Process ended successfully" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Log exception here
+        //        return Json(new { success = false, message = "An error occurred while ending the process." });
+        //    }
+        //}
+
+
         [HttpPost]
         public async Task<IActionResult> EndHandi(string batchId)
         {
@@ -181,6 +203,24 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
+                // Check if any batch in the dryer is in "Paused" or "In Progress" status
+                bool isDryerFree = await _machineProcessService.IsDryerFreeAsync();
+                if (!isDryerFree)
+                {
+                    // Return a failure message if the dryer is not free
+                    return Json(new { success = false, message = "Dryer not free" });
+                }
+
+                bool areAllBatchesInDryerProcess = await _machineProcessService.AreAllCompletedBatchesInDryerProcessAsync();
+                if (!areAllBatchesInDryerProcess)
+                {
+                    return Json(new { success = false, message = "Not all completed batches are available in the Dryer process." });
+                }
+
+
+
+
+                // Proceed with ending the Handi process if dryer is free
                 await _machineProcessService.EndProcessAsync(batchId);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
@@ -191,6 +231,10 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return Json(new { success = false, message = "An error occurred while ending the process." });
             }
         }
+
+
+
+
 
     }
 }

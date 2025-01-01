@@ -249,5 +249,45 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
+        public async Task<bool> IsDryerFreeAsync()
+        {
+            // Check if there are any batches in the dryer that are "Paused" or "In Progress"
+            var ongoingBatches = await _context.DryerProcesses
+                .Where(p => p.ProcessStatus == "Paused" || p.ProcessStatus == "In Progress")
+                .ToListAsync();
+
+            return !ongoingBatches.Any();  // Return true if no ongoing batches, meaning dryer is free
+        }
+
+
+
+        public async Task<bool> AreAllCompletedBatchesInDryerProcessAsync()
+        {
+            // Step 1: Get all the completed batches from the Handi process table
+            var completedBatches = await _context.HandiProcesses
+                .Where(p => p.ProcessStatus == "Completed") // Get all completed batches
+                .Select(p => p.BatchId)  // Select only BatchIds
+                .ToListAsync();
+
+            // Step 2: Check if all the completed batches from Handi are present in the Dryer process table
+            foreach (var batchId in completedBatches)
+            {
+                var batchInDryerProcess = await _context.DryerProcesses
+                    .Where(d => d.BatchId == batchId)  // Check if the batch is in the Dryer process
+                    .FirstOrDefaultAsync();
+
+                if (batchInDryerProcess == null)
+                {
+                    // If any batch is missing, return false
+                    return false;
+                }
+            }
+
+            // Step 3: If all completed batches are found in the Dryer process table, return true
+            return true;
+        }
+
+
+
     }
 }

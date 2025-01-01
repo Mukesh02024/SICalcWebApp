@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
 using SICalcWebApp.Data;
@@ -11,10 +12,12 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
     public class PlantOperateController : Controller
     {
         private readonly IMasterMillPlant _service;
+        private readonly ApplicationDbContext _context;
 
-        public PlantOperateController(IMasterMillPlant service)
+        public PlantOperateController(IMasterMillPlant service , ApplicationDbContext context)
         {
             _service = service;
+            _context = context;
         }
 
         //--------This Section For Staff
@@ -426,6 +429,20 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Check if the bunker name already exists
+                var existingBunker = await _context.MillBunkers
+                    .FirstOrDefaultAsync(b => b.MillBName == process.MillBName);
+
+                if (existingBunker != null)
+                {
+                    // Handle the case where the bunker already exists, show an error
+                    ModelState.AddModelError("", "This bunker name already exists.");
+                    return View(process);
+                }
+
+                // Set default values for Status and LastUpdated
+                process.Status = "EMPTY";  // Default value when adding a new bunker
+                process.LastUpdated = DateTime.Now;  // Set the current time when adding
                 await _service.AddAsync(process);
                 return RedirectToAction(nameof(ListMillBunekr));
             }

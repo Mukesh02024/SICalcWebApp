@@ -19,8 +19,7 @@ namespace SICalcWebApp.Areas.RiceMill.Models
    
         public DateTime? UnloadTime { get; set; }
 
-        [Required(ErrorMessage = "Unload Bunker Name is required.")]
-        public string UnloadBunkerName { get; set; } // Dropdown from Master Data
+        public string? UnloadBunkerName { get; set; } // Dropdown from Master Data
 
         [Required(ErrorMessage = "Staff Name is required.")]
         public string StaffName { get; set; } // Dropdown from Master Data
