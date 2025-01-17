@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
@@ -9,6 +10,7 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Areas.RiceMill.Controllers
 {
     [Area("RiceMill")]
+    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
     public class MillingController : Controller
     {
         private readonly IMachineProcessService _machineProcessService;
@@ -37,7 +39,9 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             {
                 Bunkers = await _millingProcessService.GetOccupiedBunkersAsync(),
                 Batches = new List<SelectListItem>(), // Initialize with an empty list
-                Staffs = await GetStaffList() // Populate staff list
+                Staffs = await GetStaffList(),
+          
+           
             };
 
             return View(model);
@@ -63,7 +67,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 BatchId = model.BatchId,
                 StaffName = model.StaffName,
                 MillBunkerName = model.MillBunkerName,
-                StartTime = DateTime.Now,
+                StartTime = model.StartTime,
                 ProcessStatus = "In Progress"
             };
 
@@ -84,13 +88,6 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             return RedirectToAction("Dashboard", new { batchId = millingProcess.BatchId });
         }
 
-
-
-
-
-
-
-      
 
 
         // GET: Dryer Dashboard
@@ -119,7 +116,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> PauseMill(string batchId, string pauseReason)
+        public async Task<IActionResult> PauseMill(string batchId, string pauseReason,DateTime? PauseTime)
         {
             try
             {
@@ -128,7 +125,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason))
                 {
                     // Pause the process
-                    await _millingProcessService.PauseProcessAsync(batchId, pauseReason);
+                    await _millingProcessService.PauseProcessAsync(batchId, pauseReason, PauseTime);
 
                     return Json(new { success = true, message = "Process Paused" });
                 }
@@ -145,7 +142,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ResumeMill(string batchId)
+        public async Task<IActionResult> ResumeMill(string batchId,DateTime? ResumeTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -154,7 +151,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _millingProcessService.ResumeProcessAsync(batchId);
+                await _millingProcessService.ResumeProcessAsync(batchId, ResumeTime);
                 return Json(new { success = true, message = "Process resumed successfully" });
             }
             catch (Exception ex)
@@ -167,7 +164,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> EndMill(string batchId, string SortexBunker)
+        public async Task<IActionResult> EndMill(string batchId, string SortexBunker,DateTime? EndTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -176,7 +173,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _millingProcessService.EndProcessAsync(batchId, SortexBunker);
+                await _millingProcessService.EndProcessAsync(batchId, SortexBunker, EndTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }
@@ -242,11 +239,6 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 })
                 .ToListAsync();
         }
-
-
-
-
-
 
 
 

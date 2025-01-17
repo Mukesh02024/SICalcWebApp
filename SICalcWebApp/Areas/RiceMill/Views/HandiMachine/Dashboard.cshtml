@@ -15,6 +15,10 @@
             color: brown;
         }
 
+        .small-input {
+            max-width: 200px;
+        }
+
         @@keyframes blinkingText {
             0%
 
@@ -60,16 +64,24 @@
         <!-- Resume and End Buttons -->
         @if (Model.ProcessStatus == "Paused")
         {
-            <button class="btn btn-success" onclick="performAction('resume', '@Model.BatchId')">Resume</button>
+            <button class="btn btn-success" onclick="showResumeForm()">Resume</button>
+
         }
 
         @if (Model.ProcessStatus == "In Progress" || Model.ProcessStatus == "Paused")
         {
-            <button class="btn btn-danger" onclick="performAction('end', '@Model.BatchId')">End</button>
+            @if (Model.ProcessType == "ARWA")
+            {
+                <button class="btn btn-danger" onclick="showEndForm()">End</button>
+            }
+            else
+            {
+                <button class="btn btn-danger" onclick="showEndFormU()">End</button>
+            }
         }
 
         <!-- Pause Reason Form -->
-        <div id="pauseReasonForm" class="mt-3" style="display: none;">
+        <div id="pauseReasonForm" class="mt-3 small-input" style="display: none;">
             <h4>Pause Reason</h4>
             <div class="form-group">
                 <label for="pauseReason">Select Reason:</label>
@@ -79,28 +91,244 @@
                         <option value="@reason">@reason</option>
                     }
                 </select>
+
+                <div class="form-group">
+                    <label for="pauseTime">Pause Time:</label>
+                    <input id="pauseTime" class="form-control" type="datetime-local" />
+                </div>
+
             </div>
+
+       
             <button id="submitPauseReasonButton" class="btn btn-primary">Submit</button>
         </div>
+
+
+        <div id="resumeTimeForm" class="mt-3 small-input" style="display: none;">
+            <h4>Resume Process</h4>
+            <div class="form-group">
+                <label for="ResumeTime">Select Resume Time:</label>
+                <input id="resumeTime" class="form-control" type="datetime-local" />
+            </div>
+            <button class="btn btn-primary" onclick="submitResumeTime()">Submit</button>
+        </div>
+
+
+
+        <div id="EndTimeForm" class="mt-3 small-input" style="display: none;">
+            <h4>End Process</h4>
+            <div class="form-group">
+                <label for="EndTime">Select End Time:</label>
+                <input id="EndTime" class="form-control" type="datetime-local" />
+            </div>
+            <button class="btn btn-primary" onclick="submitEndTime()">Submit</button>
+        </div>
+
+
+
+
+        <!-- End Form for 'Arwa' -->
+        <div id="endForm" class="mt-3 small-input" style="display: none;">
+            <h4>Complete Process for 'Arwa'</h4>
+            <div class="form-group">
+
+
+                <label for="UnloadBunker">Unload Bunker Name</label>
+                <select id="unloadBunker" class="form-control">
+                    @if (ViewBag.EmptyBunkers != null && ViewBag.EmptyBunkers.Count > 0)
+                    {
+                        foreach (var bunker in ViewBag.EmptyBunkers as List<string>)
+                        {
+                            <option value="@bunker">@bunker</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="">No empty bunkers available</option>
+                    }
+                </select>
+                <span asp-validation-for="UnloadBunkerName" class="text-danger"></span>
+
+             
+
+            </div>
+
+
+            <div class="form-group">
+                <label for="endTimeInput">Select End Time:</label>
+                <input id="endTimeInput" class="form-control" type="datetime-local" />
+            </div>
+            <button class="btn btn-primary" onclick="completeArwaProcess()">Complete Process</button>
+        </div>
+
+
+
+
+
+
+
+
+
+
     </div>
 
     <script>
+
+                document.addEventListener("DOMContentLoaded", function () {
+                // Automatically set current date and time in local format
+                const now = new Date();
+                const formattedDateTime = now.getFullYear() + '-' +
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(now.getDate()).padStart(2, '0') + 'T' +
+                    String(now.getHours()).padStart(2, '0') + ':' +
+                    String(now.getMinutes()).padStart(2, '0');
+
+                const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+                datetimeFields.forEach((field) => {
+                    field.value = formattedDateTime;  // Set default to current date and time
+                    field.max = formattedDateTime;   // Restrict future date selection
+                    field.addEventListener("change", function () {
+                        field.blur(); // Remove focus to close the picker
+                    });
+                });
+            });
+
+
+
+                    function showEndFormU() {
+                    document.getElementById("EndTimeForm").style.display = "block";
+                          document.getElementById("resumeTimeForm").style.display = "none";
+                               document.getElementById("pauseReasonForm").style.display = "none";
+            }
+
+            function submitEndTime() {
+                const batchId = "@Model.BatchId"; // Populate dynamically
+            const EndTime = document.getElementById("EndTime").value;
+
+                if (!EndTime) {
+                 
+                    
+                alert("Please select a valid End time.");
+                return;
+            }
+                 
+                performAction('end', batchId, {EndTime });
+            }
+
+
+
+                function showResumeForm() {
+            document.getElementById("resumeTimeForm").style.display = "block";
+
+                 document.getElementById("EndTimeForm").style.display = "none";
+                      
+                   document.getElementById("pauseReasonForm").style.display = "none";
+        }
+
+        function submitResumeTime() {
+                const batchId = "@Model.BatchId"; // Populate dynamically
+        const resumeTime = document.getElementById("resumeTime").value;
+
+        if (!resumeTime) {
+            alert("Please select a valid resume time.");
+            return;
+        }
+
+        performAction('resume', batchId, { resumeTime });
+        }
+
+
+
+                // Show End Form for 'Arwa'
+        function showEndForm() {
+
+         const unloadBunkerDropdown = document.getElementById("unloadBunker");
+
+        if (!unloadBunkerDropdown || unloadBunkerDropdown.options.length === 0 || unloadBunkerDropdown.value === "") {
+            alert("No empty bunkers available. Please ensure a bunker is free before ending the process.");
+            return;
+        }
+
+
+
+
+            document.getElementById("endForm").style.display = "block";
+        }
+
+        // Complete Process for 'Arwa'
+        function completeArwaProcess() {
+            const batchId = "@Model.BatchId";
+            const unloadBunker = document.getElementById("unloadBunker").value;
+                 const endTime = document.getElementById("endTimeInput").value; // End Time from input field
+
+            if (!unloadBunker) {
+                alert("Please select an unload bunker.");
+                return;
+            }
+                 if (!endTime) {
+            alert("Please provide an end time.");
+            return;
+        }
+
+                 const body = `batchId=${encodeURIComponent(batchId)}&unloadBunker=${encodeURIComponent(unloadBunker)}&endTime=${encodeURIComponent(endTime)}`;
+
+        // Perform the POST request
+        fetch('@Url.Action("CompleteArwaProcess", "HandiMachine", new { area = "RiceMill" })', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        alert('Process completed successfully.');
+                        window.location.href = `/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
+                    } else {
+                        alert(data.message || 'Failed to complete process.');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error completing process:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+
+
+
         // Show Pause Form
         function showPauseForm() {
             document.getElementById("pauseReasonForm").style.display = "block";
+
+                            document.getElementById("resumeTimeForm").style.display = "none";
+
+                     document.getElementById("EndTimeForm").style.display = "none";
+
+          
         }
 
         // Perform Action (Pause, Resume, End)
-        function performAction(action, batchId, pauseReason = null) {
+
+    function performAction(action, batchId, data = null) {
             const urlMap = {
                 pause: '/RiceMill/HandiMachine/PauseHandi',
                 resume: '/RiceMill/HandiMachine/ResumeHandi',
                 end: '/RiceMill/HandiMachine/EndHandi',
             };
 
-            const body = pauseReason
-                ? `batchId=${encodeURIComponent(batchId)}&pauseReason=${encodeURIComponent(pauseReason)}`
-                : `batchId=${encodeURIComponent(batchId)}`;
+                 let body = `batchId=${encodeURIComponent(batchId)}`;
+                if (data) {
+            if (data.pauseReason && data.pauseTime) {
+                body += `&pauseReason=${encodeURIComponent(data.pauseReason)}&pauseTime=${encodeURIComponent(data.pauseTime)}`;
+            }
+            if (data.resumeTime) {
+                body += `&resumeTime=${encodeURIComponent(data.resumeTime)}`;
+            }
+                   if (data.EndTime) {
+                                    body += `&EndTime=${encodeURIComponent(data.EndTime)}`;
+                }
+        }
+
+      
 
             fetch(urlMap[action], {
                 method: 'POST',
@@ -120,11 +348,20 @@
                 });
         }
 
+
+
+    
+
         // Pause Form Submission
         document.getElementById("submitPauseReasonButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             const pauseReason = document.getElementById("pauseReason").value;
-            performAction('pause', batchId, pauseReason);
+             const pauseTime = document.getElementById("pauseTime").value;
+                  if (!pauseReason || !pauseTime) {
+            alert("Please provide both a valid reason and pause time.");
+            return;
+        }
+            performAction('pause', batchId,{ pauseReason, pauseTime });
         });
     </script>
 </body>

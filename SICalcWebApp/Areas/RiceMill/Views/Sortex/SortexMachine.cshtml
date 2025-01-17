@@ -5,8 +5,6 @@
 }
 @model SICalcWebApp.Areas.RiceMill.Models.SortexProcess
 
-
-
 <div class="form-container">
     <h2 class="form-header">Sortex Process</h2>
     <form asp-action="StartSortex" method="post">
@@ -16,24 +14,34 @@
 
                 <div class="form-group">
                     <label for="SortexBunkerName">Sortex Bunker</label>
-                    <select id="SortexBunker" name="SortexBunkerName" class="form-control">
+                    <select asp-for="SortexBunkerName" id="SortexBunker" name="SortexBunkerName" class="form-control">
                         <option value="">Select Sortex Bunker</option>
                         @foreach (var bunker in ViewBag.SortexBunkers as List<string>)
                         {
                             <option value="@bunker">@bunker</option>
                         }
                     </select>
+                    <span asp-validation-for="SortexBunkerName" class="text-danger"></span>
                 </div>
+
+
+
+                <div class="form-group">
+                    <label for="BatchId">Batch ID</label>
+                    <select asp-for="BatchId" id="BatchId" name="BatchId" class="form-control">
+                        <option value="">Select a Batch ID</option>
+                    </select>
+
+                    <span asp-validation-for="BatchId" class="text-danger"></span>
+                </div>
+
+
+
+
             </div>
 
 
-            <div class="form-group">
-                <label for="BatchId">Batch ID</label>
-                <select id="BatchId" name="BatchId" class="form-control">
-                    <option value="">Select a Batch ID</option>
-                </select>
-            </div>
-
+       
 
 
             <div class="col-md-6">
@@ -47,6 +55,11 @@
                         }
                     </select>
                     <span asp-validation-for="StaffName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="StartTime">Start Time:</label>
+                    <input asp-for="StartTime" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
                 </div>
 
                 
@@ -65,6 +78,37 @@
 }
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+
+      document.addEventListener("DOMContentLoaded", function () {
+                      // Automatically set current date and time in local format
+                      const now = new Date();
+                      const formattedDateTime = now.getFullYear() + '-' +
+                          String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(now.getDate()).padStart(2, '0') + 'T' +
+                          String(now.getHours()).padStart(2, '0') + ':' +
+                          String(now.getMinutes()).padStart(2, '0');
+
+                      const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+                      datetimeFields.forEach((field) => {
+                          field.value = formattedDateTime;  // Set default to current date and time
+                          field.max = formattedDateTime;   // Restrict future date selection
+                          field.addEventListener("change", function () {
+                              field.blur(); // Remove focus to close the picker
+                          });
+                      });
+                  });
+
+
+
+
+
+
+
+
+
+
+
+
     $(document).ready(function () {
         $('#SortexBunker').change(function () {
             var selectedBunker = $(this).val();

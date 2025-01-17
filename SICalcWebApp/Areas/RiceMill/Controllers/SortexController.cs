@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Areas.RiceMill.Services;
 using SICalcWebApp.Data;
@@ -6,6 +7,7 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Areas.RiceMill.Controllers
 {
     [Area("RiceMill")]
+    [Authorize(Roles = $"{SD.Role_Mill_Admin},{SD.Role_Super_Admin}")]
     public class SortexController : Controller
     {
         private readonly IMachineProcessService _machineProcessService;
@@ -27,6 +29,11 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 // If there's an active process, redirect to the Dashboard to view the active process
                 return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
             }
+            var model = new SortexProcess
+            {
+                StartTime = DateTime.Now
+
+            };
 
             var occupiedSortexBunkers = await _sortexService.GetOccupiedSortexBunkersAsync();
             ViewBag.SortexBunkers = occupiedSortexBunkers;
@@ -36,7 +43,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             ViewBag.StaffNames = masterData.StaffNames;
 
 
-            return View(new SortexProcess()); // Use Dryer-specific view model
+            return View(model); // Use Dryer-specific view model
 
         }
 
@@ -77,7 +84,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 BatchId = model.BatchId,
                 StaffName = model.StaffName,
                 SortexBunkerName = model.SortexBunkerName,
-                StartTime = DateTime.Now,
+                StartTime = model.StartTime,
                 ProcessStatus = "In Progress"
             };
 
@@ -122,7 +129,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> PauseSortex(string batchId, string pauseReason)
+        public async Task<IActionResult> PauseSortex(string batchId, string pauseReason,DateTime? PauseTime)
         {
             try
             {
@@ -131,7 +138,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason))
                 {
                     // Pause the process
-                    await _sortexService.PauseProcessAsync(batchId, pauseReason);
+                    await _sortexService.PauseProcessAsync(batchId, pauseReason,PauseTime);
 
                     return Json(new { success = true, message = "Process Paused" });
                 }
@@ -148,7 +155,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ResumeSortex(string batchId)
+        public async Task<IActionResult> ResumeSortex(string batchId,DateTime? ResumeTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -157,7 +164,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _sortexService.ResumeProcessAsync(batchId);
+                await _sortexService.ResumeProcessAsync(batchId,ResumeTime);
                 return Json(new { success = true, message = "Process resumed successfully" });
             }
             catch (Exception ex)
@@ -170,7 +177,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> EndSortex(string batchId)
+        public async Task<IActionResult> EndSortex(string batchId, DateTime? EndTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -179,7 +186,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _sortexService.EndProcessAsync(batchId);
+                await _sortexService.EndProcessAsync(batchId, EndTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }

@@ -9,11 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Milling  Machine Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
     <style>
         /* Blinking effect for status */
         .blinking {
             animation: blinkingText 0.3s infinite; /* Reduced duration for faster blinking */
             color: brown;
+        }
+
+        .small-input {
+            max-width: 200px;
         }
 
         @@keyframes blinkingText {
@@ -58,7 +63,7 @@
         <!-- Resume and End Buttons -->
         @if (Model.ProcessStatus == "Paused")
         {
-            <button class="btn btn-success" onclick="performAction('resume', '@Model.BatchId')">Resume</button>
+            <button class="btn btn-success" onclick="showResumeForm()">Resume</button>
         }
 
         @if (Model.ProcessStatus == "In Progress" || Model.ProcessStatus == "Paused")
@@ -68,7 +73,7 @@
         }
 
         <!-- Pause Reason Form -->
-        <div id="pauseReasonForm" class="mt-3" style="display: none;">
+        <div id="pauseReasonForm" class="mt-3 small-input" style="display: none;">
             <h4>Pause Reason</h4>
             <div class="form-group">
                 <label for="pauseReason">Select Reason:</label>
@@ -79,12 +84,34 @@
                     }
                 </select>
             </div>
+
+            <div class="form-group">
+                <label for="PauseTime">Pause Time:</label>
+                <input id="PauseTime" class="form-control " type="datetime-local" />
+            </div>
             <button id="submitPauseReasonButton" class="btn btn-primary">Submit</button>
         </div>
 
 
 
-        <div id="endForm" class="mt-3" style="display: none;">
+
+
+        <div id="resumeForm" class="mt-3 small-input" style="display: none;">
+            <h4>Resume Process</h4>
+            <div class="form-group">
+                <label for="ResumeTime">Select Resume Time:</label>
+                <input id="resumeTime" class="form-control " type="datetime-local" />
+            </div>
+            <button class="btn btn-primary" id="submitResumeTime">Submit</button>
+        </div>
+
+
+
+
+
+
+
+        <div id="endForm" class="mt-3 small-input" style="display: none;">
             <h4>Unload Sortex Bunker</h4>
             <div class="form-group">
 
@@ -99,15 +126,57 @@
                 </select>
                 <span asp-validation-for="SortexBunkerName" class="text-danger"></span>
             </div>
+
+            <div class="form-group">
+                <label for="EndTime">End Time:</label>
+                <input id="EndTime" class="form-control" type="datetime-local" />
+            </div>
+
             <button id="submitEndButton" class="btn btn-primary">Complete Process</button>
         </div>
 
 
-
+ 
 
     </div>
 
     <script>
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+            // Automatically set current date and time in local format
+            const now = new Date();
+            const formattedDateTime = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + 'T' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0');
+
+            const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+            datetimeFields.forEach((field) => {
+                field.value = formattedDateTime;  // Set default to current date and time
+                field.max = formattedDateTime;   // Restrict future date selection
+                field.addEventListener("change", function () {
+                    field.blur(); // Remove focus to close the picker
+                });
+            });
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 function showEndForm() {
             // Check if any bunker is empty
@@ -121,6 +190,7 @@
                     // If a bunker is empty, show the "End" form
                     document.getElementById("endForm").style.display = "block";
                     document.getElementById("pauseReasonForm").style.display = "none";
+                    document.getElementById("resumeForm").style.display = "none";
                 } else {
                     // Display the alert message
                     alert(data.message);
@@ -143,16 +213,20 @@
         // Show Pause Form
         function showPauseForm() {
             document.getElementById("pauseReasonForm").style.display = "block";
+             document.getElementById("endForm").style.display = "none";
+
+                    document.getElementById("resumeForm").style.display = "none";
+
         }
 
         // Perform Action (Pause, Resume, End)
-        function performAction(action, batchId, pauseReason = null,unloadBunker = null) {
+        function performAction(action, batchId, pauseReason = null,unloadBunker = null,pauseTime=null,endTime=null,resumeTime=null) {
 
                 console.log("Action:", action);
         console.log("Batch ID:", batchId);
         console.log("Pause Reason:", pauseReason);
         console.log("Unload Bunker:", unloadBunker); // This should work now if unloadBunker is passed correctly
-
+        console.log("PauseTime:", pauseTime);
             const urlMap = {
                 pause: '/RiceMill/Milling/PauseMill',
                 resume: '/RiceMill/Milling/ResumeMill',
@@ -171,11 +245,17 @@
         // Add pauseReason if action is 'pause'
         if (action === 'pause' && pauseReason) {
             body += `&pauseReason=${encodeURIComponent(pauseReason)}`;
+            body += `&pauseTime=${encodeURIComponent(pauseTime)}`;
+        }
+          if (action === 'resume' && resumeTime) {
+            body += `&resumeTime=${encodeURIComponent(resumeTime)}`;
+            
         }
 
         // Add unloadBunker if action is 'end' and unloadBunker is provided
                if (action === 'end' && unloadBunker) {
             body += `&SortexBunker=${encodeURIComponent(unloadBunker)}`; // Send unloadBunker as SortexBunker
+            body += `&endTime=${encodeURIComponent(endTime)}`;
         }
      
 
@@ -196,21 +276,27 @@
                     console.error(`Error during '${action}':`, error);
                 });
         }
+        
 
-
-         document.getElementById("submitEndButton").addEventListener("click", function () {
+         document.getElementById("submitEndButton").addEventListener("click", function () 
+         {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             const unloadBunker = document.getElementById("SortexBunkerName").value; // Get the value of the selected Sortex Bunker
+             const endTime = document.getElementById("EndTime").value;
              console.log("Selected Sortex Bunker:", unloadBunker);
                 if (!unloadBunker) {
             alert("Please select a Sortex Bunker.");
             return; // Prevent the action from being performed if no bunker is selected
+                  if (!endTime) {
+            alert("Please select a Time.");
+                  }
+            return;
         }
          console.log("Calling performAction with action 'end' and batchId:", batchId, "unloadBunker:", unloadBunker);
             // Call performAction with 'end', batchId, and unloadBunker as arguments
-            performAction('end', batchId, null, unloadBunker); // Pass unloadBunker as the last argument
+            performAction('end', batchId, null, unloadBunker,null,endTime); // Pass unloadBunker as the last argument
         });
-
+        
 
 
 
@@ -218,8 +304,32 @@
         document.getElementById("submitPauseReasonButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             const pauseReason = document.getElementById("pauseReason").value;
-            performAction('pause', batchId, pauseReason);
+            const pauseTime=document.getElementById("PauseTime").value;
+            performAction('pause', batchId, pauseReason,null,pauseTime);
         });
+
+
+
+             function showResumeForm() {
+            document.getElementById("resumeForm").style.display = "block";
+
+                        document.getElementById("pauseReasonForm").style.display = "none";
+             document.getElementById("endForm").style.display = "none";
+
+              
+        }
+
+            // Pause Form Submission
+        document.getElementById("submitResumeTime").addEventListener("click", function () {
+            const batchId = "@Model.BatchId"; // Dynamically populated from the model
+            const resumeTime=document.getElementById("resumeTime").value;
+            performAction('resume', batchId, null,null,null,null,resumeTime);
+        });
+
+
+
+
+
     </script>
 </body>
 </html>

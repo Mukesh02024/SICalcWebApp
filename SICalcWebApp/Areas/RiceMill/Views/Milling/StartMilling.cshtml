@@ -1,51 +1,88 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-@model SICalcWebApp.Areas.RiceMill.VM.MillingProcessViewModel
+﻿@model SICalcWebApp.Areas.RiceMill.VM.MillingProcessViewModel
 
 @{
     ViewData["Title"] = "Start Milling";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="card p-4 shadow-sm" style="max-width: 650px; margin: auto; border-radius: 8px; background-color: #f8f9fa;">
+    <h3 class="text-center mb-4" style="color: #b58900;">Start Milling</h3>
 
-<form method="post" asp-action="StartMilling">
-    <div class="form-group">
-        <label for="MillBunkerName">Mill Bunker Name</label>
-        <select id="MillBunkerName" name="MillBunkerName" class="form-control">
-            <option value="">-- Select Bunker --</option>
-            @foreach (var bunker in Model.Bunkers)
-            {
-                <option value="@bunker.Text">@bunker.Text</option>
-            }
-        </select>
-    </div>
+    <form method="post" asp-action="StartMilling">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="MillBunkerName" class="form-label">Mill Bunker</label>
+                <select id="MillBunkerName" name="MillBunkerName" class="form-select">
+                    <option value="">-- Select Bunker --</option>
+                    @foreach (var bunker in Model.Bunkers)
+                    {
+                        <option value="@bunker.Text">@bunker.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="MillBunkerName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label for="BatchId" class="form-label">Batch ID</label>
+                <select id="BatchId" name="BatchId" class="form-select">
+                    <option value="">-- Select Batch --</option>
+                </select>
 
-    <div class="form-group">
-        <label for="BatchId">Batch ID</label>
-        <select id="BatchId" name="BatchId" class="form-control">
-            <option value="">-- Select Batch --</option>
-        </select>
-    </div>
+                <span asp-validation-for="BatchId" class="text-danger"></span>
+            </div>
+        </div>
 
-    <div class="form-group">
-        <label for="StaffName">Staff Name</label>
-        <select id="StaffName" name="StaffName" class="form-control">
-            <option value="">-- Select Staff --</option>
-            @foreach (var staff in Model.Staffs)
-            {
-                <option value="@staff.Value">@staff.Text</option>
-            }
-        </select>
-    </div>
+        <div class="row mb-3">
+            <!-- Staff Name -->
+            <div class="col-md-6">
+                <label for="StaffName" class="form-label">Staff Name</label>
+                <select id="StaffName" name="StaffName" class="form-select">
+                    <option value="">Select Staff</option>
+                    @foreach (var staff in Model.Staffs)
+                    {
+                        <option value="@staff.Value">@staff.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="StaffName" class="text-danger"></span>
+            </div>
 
-    <button type="submit" class="btn btn-primary">Start Milling</button>
-</form>
+            <!-- Start Time -->
+            <div class="col-md-6">
+                <label asp-for="StartTime">Start Time</label>
+                <input asp-for="StartTime" class="form-control" type="datetime-local" id="startTime" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+
+          @*  Start Time
+                <input asp-for="StartTime" type="datetime-local"  style="width: 200px; padding:0px;" />
+                <span asp-validation-for="StartTime" class="text-danger"></span> *@
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Start Milling</button>
+    </form>
+</div>
 
 @section Scripts {
     <script>
+
+               document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("startTime");
+
+            // Set the maximum date and time to the current date and time
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            const maxDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+            input.setAttribute("max", maxDateTime);
+
+            // Optionally set the default value to current date and time
+            input.value = maxDateTime;
+        });
+
+
+
+
         // Use jQuery to listen for bunker selection change
         $('#MillBunkerName').change(function () {
             var bunkerName = $(this).val();
@@ -55,6 +92,7 @@
                     url: '@Url.Action("GetBatchesForBunker", "Milling")',
                     data: { occupiedBunkerName: bunkerName },
                     success: function (data) {
+                        console.log('Response Data:', data); // Log response to console
                         // Populate the batch dropdown with fetched batches
                         var batchDropdown = $('#BatchId');
                         batchDropdown.empty(); // Clear previous items

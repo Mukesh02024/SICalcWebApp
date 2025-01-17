@@ -31,6 +31,10 @@ namespace SICalcWebApp.Areas.RiceMill.Models
              PauseTime.HasValue && ResumeTime.HasValue
              ? ResumeTime - PauseTime
              : null;
+        // Handi Run Count (this will be the default to 8 if ProcessType is not "ARWA")
+        public int? HandiRunCount { get; set; }
 
+        // Unload Bunker Name (only visible if ProcessType is "ARWA")
+        public string? UnloadBunkerName { get; set; }
     }
 }

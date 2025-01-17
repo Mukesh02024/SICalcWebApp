@@ -30,7 +30,7 @@
                     <!-- Process Type -->
                     <div class="col-md-6">
                         <label asp-for="ProcessType">Process Type</label>
-                        <select asp-for="ProcessType" class="form-control">
+                        <select asp-for="ProcessType" class="form-control" id="processTypeSelect">
                             <option value="">-- Select Process Type --</option>
                             @foreach (var processType in ViewBag.ProcessTypes as List<string>)
                             {
@@ -71,19 +71,34 @@
 
                 <div class="row mb-3">
                     <!-- Temperature -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label asp-for="Temperature">Temperature</label>
                         <input asp-for="Temperature" class="form-control" type="number" placeholder="Enter Temperature" />
                         <span asp-validation-for="Temperature" class="text-danger"></span>
                     </div>
 
                     <!-- Pressure -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label asp-for="Pressure">Pressure</label>
                         <input asp-for="Pressure" class="form-control" type="number" placeholder="Enter Pressure" />
                         <span asp-validation-for="Pressure" class="text-danger"></span>
                     </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="StartTime">Start-Time</label>
+                        <input asp-for="StartTime" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+
+
                 </div>
+                <!-- Number of Handi Run (conditionally visible) -->
+                <div class="form-group" id="handiRunField" style="display: none;">
+                    <label for="HandiRunCount">Number of Handi Run</label>
+                    <input type="number" id="HandiRunCount" name="HandiRunCount" class="form-control" />
+                </div>
+
+
 
                 <!-- Submit Button -->
                 <div class="text-center">
@@ -96,6 +111,54 @@
 
 
 @section Scripts {
+
+   
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+                  // Automatically set current date and time in local format
+                  const now = new Date();
+                  const formattedDateTime = now.getFullYear() + '-' +
+                      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                      String(now.getDate()).padStart(2, '0') + 'T' +
+                      String(now.getHours()).padStart(2, '0') + ':' +
+                      String(now.getMinutes()).padStart(2, '0');
+
+                  const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+                  datetimeFields.forEach((field) => {
+                      field.value = formattedDateTime;  // Set default to current date and time
+                      field.max = formattedDateTime;   // Restrict future date selection
+                      field.addEventListener("change", function () {
+                          field.blur(); // Remove focus to close the picker
+                      });
+                  });
+              });
+
+
+
+
+
+
+        // JavaScript to show/hide "Number of Handi Run" field based on selected Process Type
+        document.getElementById("processTypeSelect").addEventListener("change", function () {
+            var processType = this.value;
+            var handiRunField = document.getElementById("handiRunField");
+
+            // Show the field if ARWA is selected, else hide it
+            if (processType === "ARWA") {
+                handiRunField.style.display = "block";
+            } else {
+                handiRunField.style.display = "none";
+            }
+        });
+
+        // Trigger change event on page load to set the initial state
+        document.getElementById("processTypeSelect").dispatchEvent(new Event("change"));
+    </script>
+
+
+
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

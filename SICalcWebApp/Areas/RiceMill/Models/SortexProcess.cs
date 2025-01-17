@@ -5,6 +5,8 @@ namespace SICalcWebApp.Areas.RiceMill.Models
     public class SortexProcess
     {
         public int SortexProcessId { get; set; }
+
+        [Required(ErrorMessage = "batch Id is required.")]
         public string BatchId { get; set; } // Foreign key to Batch table
 
         public DateTime? StartTime { get; set; } // Current time (already set)

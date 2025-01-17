@@ -60,21 +60,21 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task PauseProcessAsync(string batchId, string pauseReason)
+        public async Task PauseProcessAsync(string batchId, string pauseReason, DateTime? pauseTime)
         {
             var process = await _context.HandiProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "Paused";
                 process.PauseReason = pauseReason;
-                process.PauseTime = DateTime.Now;
+                process.PauseTime = pauseTime;
       
                 _context.HandiProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task ResumeProcessAsync(string batchId)
+        public async Task ResumeProcessAsync(string batchId, DateTime? resumeTime)
         {
             //var process = await _context.HandiProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             //if (process != null)
@@ -94,7 +94,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             if (process != null)
             {
                 process.ProcessStatus = "In Progress";
-                process.ResumeTime = DateTime.Now;
+                process.ResumeTime = resumeTime;
 
                 // Accumulate the current pause duration into TotalDelayTime
                 if (process.PauseTime.HasValue)
@@ -117,7 +117,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         }
 
-        public async Task EndProcessAsync(string batchId)
+        public async Task EndProcessAsync(string batchId, DateTime? endTime)
         {
             var process = await _context.HandiProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
@@ -136,7 +136,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 }
 
                 // Update the end details after handling pause-related calculations
-                process.EndTime = DateTime.Now;
+                process.EndTime = endTime;
                 process.ProcessStatus = "Completed";
 
                 _context.HandiProcesses.Update(process);
@@ -190,54 +190,24 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-            //var processTypes = await _context.ProcessMethods
-            //    .Select(pt => new SelectListItem
-            //    {
-            //        Value = pt.Id.ToString(),
-            //        Text = pt.MethodName,
-            //    }).ToListAsync();
-
-            //var paddyTypes = await _context.PaddyTypes
-            //    .Select(pt => new SelectListItem
-            //    {
-            //        Value = pt.Id.ToString(),
-            //        Text = pt.PaddyTypeName
-            //    }).ToListAsync();
-
-            //var handiTypes = await _context.TypeOfHandis
-            //    .Select(ht => new SelectListItem
-            //    {
-            //        Value = ht.Id.ToString(),
-            //        Text = ht.TypeHandiName
-            //    }).ToListAsync();
-
-            //var staffNames = await _context.Staffs
-            //    .Select(s => new SelectListItem
-            //    {
-            //        Value = s.Id.ToString(),
-            //        Text = s.StaffName
-            //    }).ToListAsync();
-
-            //return new MasterDataViewModel
-            //{
-            //    ProcessTypes = processTypes,
-            //    PaddyTypes = paddyTypes,
-            //    HandiTypes = handiTypes,
-            //    StaffNames = staffNames
-            //};
+     
         }
 
-   
-        public int GetNextBatchId()
+
+        public int GetNextBatchId(string batchPrefix)
         {
-            var lastBatch = _context.HandiProcesses.OrderByDescending(p => p.HandiProcessId).FirstOrDefault();
+            // Fetch the last batch for the given prefix
+            var lastBatch = _context.HandiProcesses
+                                    .Where(p => p.BatchId.StartsWith($"{batchPrefix}-"))
+                                    .OrderByDescending(p => p.HandiProcessId)
+                                    .FirstOrDefault();
 
             int nextBatchId = 1000; // Default starting value
 
             if (lastBatch != null)
             {
-                // Extract the numeric part from the BatchId (after 'RICE-')
-                var lastBatchNumber = lastBatch.BatchId.Replace("RICE-", "");
+                // Extract the numeric part from the BatchId (after the prefix)
+                var lastBatchNumber = lastBatch.BatchId.Replace($"{batchPrefix}-", "");
 
                 if (int.TryParse(lastBatchNumber, out int batchNumber))
                 {
@@ -265,7 +235,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         {
             // Step 1: Get all the completed batches from the Handi process table
             var completedBatches = await _context.HandiProcesses
-                .Where(p => p.ProcessStatus == "Completed") // Get all completed batches
+                .Where(p => p.ProcessStatus == "Completed" && p.ProcessType == "USNA") // Get all completed batches
                 .Select(p => p.BatchId)  // Select only BatchIds
                 .ToListAsync();
 
@@ -286,6 +256,58 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             // Step 3: If all completed batches are found in the Dryer process table, return true
             return true;
         }
+
+
+
+
+
+
+
+
+        public bool CompleteArwaProcess(string batchId, string unloadBunker, DateTime? endTime)
+        {
+            // Retrieve the process with the given batch ID
+            var process = _context.HandiProcesses.FirstOrDefault(p => p.BatchId == batchId && p.ProcessType == "ARWA" && p.ProcessStatus != "Completed");
+            if (process == null)
+            {
+                return false;  // Process not found or already completed
+            }
+            if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
+            {
+                // Calculate delay as the difference between EndTime (current time) and PauseTime
+                var additionalDelay = DateTime.Now - process.PauseTime.Value;
+
+                // Add the additional delay to the total delay time
+                process.TotalDelayTime = (process.TotalDelayTime ?? TimeSpan.Zero) + additionalDelay;
+
+                // Reset PauseTime since the process is ending
+                process.PauseTime = null;
+            }
+
+            // Update process status and set the unload bunker name
+            process.ProcessStatus = "Completed";
+            process.UnloadBunkerName = unloadBunker;
+            process.EndTime = endTime;
+
+            // Retrieve the selected bunker and update its status to 'Occupied'
+            var bunker = _context.MillBunkers.FirstOrDefault(b => b.MillBName == unloadBunker);
+            if (bunker == null)
+            {
+                return false;  // Bunker not found
+            }
+
+            // Set the bunker status as 'Occupied'
+            bunker.Status = "Occupied";
+
+            // Save changes to the database for both tables
+            _context.SaveChanges();
+
+            return true;
+        }
+
+
+
+
 
 
 

@@ -16,7 +16,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         {
             // Fetch completed batch IDs from HandiProcess
             var handiCompletedBatchIds = await _context.HandiProcesses
-                .Where(hp => hp.ProcessStatus == "Completed")
+                .Where(hp => hp.ProcessStatus == "Completed" && hp.ProcessType =="USNA")
                 .Select(hp => hp.BatchId)
                 .ToListAsync();
 
@@ -49,21 +49,21 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task PauseProcessAsync(string batchId, string pauseReason)
+        public async Task PauseProcessAsync(string batchId, string pauseReason, DateTime? pauseTime)
         {
             var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "Paused";
                 process.PauseReason = pauseReason;
-                process.PauseTime = DateTime.Now;
+                process.PauseTime = pauseTime;
 
                 _context.DryerProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task ResumeProcessAsync(string batchId)
+        public async Task ResumeProcessAsync(string batchId, DateTime? resumeTime)
         {
     
 
@@ -71,7 +71,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             if (process != null)
             {
                 process.ProcessStatus = "In Progress";
-                process.ResumeTime = DateTime.Now;
+                process.ResumeTime = resumeTime;
 
                 // Accumulate the current pause duration into TotalDelayTime
                 if (process.PauseTime.HasValue)
@@ -92,34 +92,8 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         }
 
-        //public async Task EndProcessAsync(string batchId, string UnloadBunkers)
-        //{
-        //    var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
-        //    if (process != null)
-        //    {
-        //        // Check if the process is paused
-        //        if (process.ProcessStatus == "Paused" && process.PauseTime.HasValue)
-        //        {
-        //            // Calculate delay as the difference between EndTime (current time) and PauseTime
-        //            var additionalDelay = DateTime.Now - process.PauseTime.Value;
-
-        //            // Add the additional delay to the total delay time
-        //            process.TotalDelayTime = (process.TotalDelayTime ?? TimeSpan.Zero) + additionalDelay;
-
-        //            // Reset PauseTime since the process is ending
-        //            process.PauseTime = null;
-        //        }
-
-        //        // Update the end details after handling pause-related calculations
-        //        process.UnloadTime = DateTime.Now;
-        //        process.UnloadBunkerName = UnloadBunkers;
-        //        process.ProcessStatus = "Completed";
-
-        //        _context.DryerProcesses.Update(process);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
-        public async Task EndProcessAsync(string batchId, string UnloadBunkers)
+    
+        public async Task EndProcessAsync(string batchId, string UnloadBunkers, DateTime? UnloadTime)
         {
             // Fetch the DryerProcess based on the BatchId
             var process = await _context.DryerProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
@@ -139,7 +113,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 }
 
                 // Update the end details after handling pause-related calculations
-                process.UnloadTime = DateTime.Now;
+                process.UnloadTime = UnloadTime;
                 process.UnloadBunkerName = UnloadBunkers;
                 process.ProcessStatus = "Completed";
 

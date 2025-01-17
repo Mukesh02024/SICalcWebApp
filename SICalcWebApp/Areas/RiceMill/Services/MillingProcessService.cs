@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SICalcWebApp.Areas.RiceMill.Models;
 using SICalcWebApp.Data;
+using System.Runtime.Intrinsics.Arm;
 
 namespace SICalcWebApp.Areas.RiceMill.Services
 {
@@ -50,21 +51,21 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task PauseProcessAsync(string batchId, string pauseReason)
+        public async Task PauseProcessAsync(string batchId, string pauseReason, DateTime? PauseTime)
         {
             var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "Paused";
                 process.PauseReason = pauseReason;
-                process.PauseTime = DateTime.Now;
+                process.PauseTime = PauseTime;
 
                 _context.MillingProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task ResumeProcessAsync(string batchId)
+        public async Task ResumeProcessAsync(string batchId, DateTime? ResumeTime)
         {
 
 
@@ -72,7 +73,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             if (process != null)
             {
                 process.ProcessStatus = "In Progress";
-                process.ResumeTime = DateTime.Now;
+                process.ResumeTime = ResumeTime;
 
                 // Accumulate the current pause duration into TotalDelayTime
                 if (process.PauseTime.HasValue)
@@ -95,7 +96,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task EndProcessAsync(string batchId , string SortexBunker)
+        public async Task EndProcessAsync(string batchId , string SortexBunker, DateTime? EndTime)
         {
             var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
@@ -114,7 +115,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 }
 
                 // Update the end details after handling pause-related calculations
-                process.EndTime = DateTime.Now;
+                process.EndTime = EndTime;
                 process.SortexBunkerName = SortexBunker;
                 process.ProcessStatus = "Completed";
 
@@ -145,11 +146,6 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         }
 
 
-
-
-
-
-
         // Method to fetch occupied bunkers
         public async Task<List<SelectListItem>> GetOccupiedBunkersAsync()
         {
@@ -168,29 +164,44 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         // Method to fetch completed batches from DryerProcess based on the selected occupied bunker
         public async Task<List<SelectListItem>> GetBatchesForOccupiedBunkerAsync(string occupiedBunkerName)
         {
-            //var batches = await _context.DryerProcesses
-            //    .Where(dp => dp.ProcessStatus == "Completed" && dp.UnloadBunkerName == occupiedBunkerName)
-            //    .Select(dp => new SelectListItem
-            //    {
-            //        Value = dp.BatchId,
-            //        Text = $"Batch {dp.BatchId}"
-            //    })
-            //    .ToListAsync();
 
-            //return batches;
 
-            var batches = await _context.DryerProcesses
-    .Where(dp => dp.ProcessStatus == "Completed"
-                && dp.UnloadBunkerName == occupiedBunkerName
-                && !_context.MillingProcesses.Any(mp => mp.BatchId == dp.BatchId))  // Exclude batches present in MillingProcess
-    .Select(dp => new SelectListItem
-    {
-        Value = dp.BatchId.ToString(),
-        Text = $"Batch {dp.BatchId}"
-    })
-    .ToListAsync();
+            // Fetch batch IDs from HandiProcess where ProcessType is "ARWA" and not in MillingProcesses
+            var handiBatchIds = await _context.HandiProcesses
+                .Where(hp => hp.ProcessType == "ARWA"
+                && hp.ProcessStatus == "Completed"
+                             && hp.UnloadBunkerName == occupiedBunkerName
+                            && !_context.MillingProcesses.Any(mp => mp.BatchId == hp.BatchId)) // Exclude batches already in MillingProcess
+                .Select(hp => hp.BatchId)
+                .ToListAsync();
 
-            return batches;
+            // Fetch completed batches from DryerProcess with specified occupied bunker
+            var dryerBatches = await _context.DryerProcesses
+                .Where(dp => dp.ProcessStatus == "Completed"
+                            && dp.UnloadBunkerName == occupiedBunkerName
+                            && !_context.MillingProcesses.Any(mp => mp.BatchId == dp.BatchId)) // Exclude batches already in MillingProcess
+                .Select(dp => new SelectListItem
+                {
+                    Value = dp.BatchId.ToString(),
+                    //Text = $"Batch {dp.BatchId}"
+                    Text = dp.BatchId.ToString()   // Set Text to Batch ID (no "Batch" prefix)
+                })
+                .ToListAsync();
+
+            // Combine batches from HandiProcess and DryerProcess
+            var allBatches = handiBatchIds
+                .Select(batchId => new SelectListItem
+                {
+                    Value = batchId.ToString(),
+                    Text = batchId.ToString()   // Set Text to Batch ID (no "Batch" prefix)
+                })
+                .ToList();
+
+            allBatches.AddRange(dryerBatches);
+
+            return allBatches;
+
+
         }
 
 
@@ -231,10 +242,6 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 .ToListAsync();
         }
 
-
-
-
-     
 
 
     }

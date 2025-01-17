@@ -12,9 +12,9 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        Task PauseProcessAsync(string batchId, string pauseReason);
-        Task ResumeProcessAsync(string batchId);
-        Task EndProcessAsync(string batchId, string UnloadBunkers);
+        Task PauseProcessAsync(string batchId, string pauseReason, DateTime? pauseTime);
+        Task ResumeProcessAsync(string batchId, DateTime? resumeTime);
+        Task EndProcessAsync(string batchId, string UnloadBunkers, DateTime? UnloadTime);
 
 
         Task<DryerProcess> GetActiveProcessAsync();

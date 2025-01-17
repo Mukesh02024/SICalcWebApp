@@ -15,6 +15,10 @@
             color: brown;
         }
 
+        .small-input {
+            max-width: 200px;
+        }
+
         @@keyframes blinkingText {
             0%
 
@@ -49,6 +53,11 @@
             : "N/A")
         </p>
 
+
+
+
+
+
         <!-- Pause Button -->
         @if (Model.ProcessStatus == "In Progress")
         {
@@ -58,7 +67,7 @@
         <!-- Resume and End Buttons -->
         @if (Model.ProcessStatus == "Paused")
         {
-            <button class="btn btn-success" onclick="performAction('resume', '@Model.BatchId')">Resume</button>
+            <button class="btn btn-success" onclick="showResumeForm()">Resume</button>
         }
 
         @if (Model.ProcessStatus == "In Progress" || Model.ProcessStatus == "Paused")
@@ -67,8 +76,8 @@
         }
 
         <!-- Pause Reason Form -->
-        <div id="pauseReasonForm" class="mt-3" style="display: none;">
-            <h4>Pause Reason</h4>
+        <div id="pauseReasonForm" class="mt-3 small-input" style="display: none;">
+            <h4>Pause Process</h4>
             <div class="form-group">
                 <label for="pauseReason">Select Reason:</label>
                 <select id="pauseReason" class="form-control" asp-for="UnloadBunkerName">
@@ -78,12 +87,35 @@
                     }
                 </select>
             </div>
+
+
+            <div class="form-group">
+                <label for="PauseTime">Pause Time:</label>
+                <input id="PauseTime" class="form-control" type="datetime-local" />
+            </div>
             <button id="submitPauseReasonButton" class="btn btn-primary">Submit</button>
         </div>
 
+
+
+
+        <div id="resumeTimeForm" class="mt-3 small-input" style="display: none;">
+            <h4>Resume Process</h4>
+            <div class="form-group">
+                <label for="ResumeTime">Select Resume Time:</label>
+                <input id="resumeTime" class="form-control" type="datetime-local" />
+            </div>
+            <button class="btn btn-primary" onclick="submitResumeTime()">Submit</button>
+        </div>
+
+
+
+
+
+
         <!-- End Form -->
-        <div id="endForm" class="mt-3" style="display: none;">
-            <h4>Unload Bunker</h4>
+        <div id="endForm" class="mt-3 small-input" style="display: none;">
+            <h4>End Process</h4>
             <div class="form-group">
                 <label for="UnloadBunker">Unload Bunker Name</label>
                 <select id="UnloadBunker" class="form-control" name="UnloadBunkerName">
@@ -95,11 +127,82 @@
                 </select>
                 <span asp-validation-for="UnloadBunkerName" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label for="UnloadTime">Select End Time:</label>
+                <input id="UnloadTime" class="form-control" type="datetime-local" />
+            </div>
             <button id="submitEndButton" class="btn btn-primary">Complete Process</button>
         </div>
     </div>
 
     <script>
+
+
+
+               document.addEventListener("DOMContentLoaded", function () {
+            // Automatically set current date and time in local format
+            const now = new Date();
+            const formattedDateTime = now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + 'T' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0');
+
+            const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+            datetimeFields.forEach((field) => {
+                field.value = formattedDateTime;  // Set default to current date and time
+                field.max = formattedDateTime;   // Restrict future date selection
+                field.addEventListener("change", function () {
+                    field.blur(); // Remove focus to close the picker
+                });
+            });
+        });
+
+
+
+
+
+
+
+
+
+          function showResumeForm() {
+            document.getElementById("resumeTimeForm").style.display = "block";
+                      document.getElementById("pauseReasonForm").style.display = "none";
+
+           document.getElementById("endForm").style.display = "none";
+
+        
+             
+        }
+
+        function submitResumeTime() {
+                const batchId = "@Model.BatchId"; // Populate dynamically
+        const resumeTime = document.getElementById("resumeTime").value;
+
+        if (!resumeTime) {
+            alert("Please select a valid resume time.");
+            return;
+        }
+
+        performAction('resume', batchId, null, null, null, resumeTime); // Pass resumeTime correctly
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Show End Form
                 function showEndForm() {
             // Check if any bunker is empty
@@ -113,6 +216,7 @@
                     // If a bunker is empty, show the "End" form
                     document.getElementById("endForm").style.display = "block";
                     document.getElementById("pauseReasonForm").style.display = "none";
+                       document.getElementById("resumeTimeForm").style.display = "none";
                 } else {
                     // Display the alert message
                     alert(data.message);
@@ -125,11 +229,7 @@
         }
 
 
-        // function showEndForm() {
-        //     document.getElementById("endForm").style.display = "block";
-        //     document.getElementById("pauseReasonForm").style.display = "none";
-        // }
-
+     
 
 
 
@@ -137,15 +237,21 @@
         // Show Pause Form
         function showPauseForm() {
             document.getElementById("pauseReasonForm").style.display = "block";
+
+           document.getElementById("endForm").style.display = "none";
+        
+                       document.getElementById("resumeTimeForm").style.display = "none";
         }
 
         // Perform Action (Pause, Resume, End)
-        function performAction(action, batchId, pauseReason = null, unloadBunker = null) {
+        function performAction(action, batchId, pauseReason = null, unloadBunker = null,pauseTime = null,resumeTime = null,unloadTime=null ) {
             console.log("Action:", action);
             console.log("Batch ID:", batchId);
             console.log("Pause Reason:", pauseReason);
             console.log("Unload Bunker:", unloadBunker);
-
+            console.log("Pause Time:", pauseTime); // Log the pause time for debugging
+            console.log("Resume Time:", resumeTime); // Log the pause time for debugging
+             console.log("End Time:", unloadTime); // Log the pause time for debugging
             const urlMap = {
                 pause: '/RiceMill/Dryer/PauseDryer',
                 resume: '/RiceMill/Dryer/ResumeDryer',
@@ -158,11 +264,19 @@
             // Add pauseReason if action is 'pause'
             if (action === 'pause' && pauseReason) {
                 body += `&pauseReason=${encodeURIComponent(pauseReason)}`;
+                  body += `&pauseTime=${encodeURIComponent(pauseTime)}`;
             }
+
+              if (action === 'resume' && resumeTime) {
+                body += `&resumeTime=${encodeURIComponent(resumeTime)}`;
+                  
+            }
+
 
             // Add unloadBunker if action is 'end' and unloadBunker is provided
             if (action === 'end' && unloadBunker) {
                 body += `&UnloadBunkerName=${encodeURIComponent(unloadBunker)}`;
+                    body += `&unloadTime=${encodeURIComponent(unloadTime)}`;
             }
 
             fetch(urlMap[action], {
@@ -187,6 +301,7 @@
         document.getElementById("submitEndButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             const bunkerElement = document.getElementById("UnloadBunker");
+               const unloadTimeElement = document.getElementById("UnloadTime");
 
             if (!bunkerElement) {
                 alert("Unload Bunker dropdown not found.");
@@ -200,16 +315,24 @@
                 alert("Please select an Unload Bunker.");
                 return; // Prevent the action from being performed if no bunker is selected
             }
+                 const unloadTimeValue = unloadTimeElement.value;
+                 console.log("Unload Time mukesh:", unloadTimeValue);  // Log the actual value
+
+        if (!unloadBunker || !unloadTimeValue) {
+                alert("Please select both Unload Bunker and Unload Time.");
+                return;
+            }
 
             console.log("Calling performAction with action 'end' and batchId:", batchId, "unloadBunker:", unloadBunker);
-            performAction('end', batchId, null, unloadBunker); // Pass unloadBunker as the last argument
+        performAction('end', batchId, null, unloadBunker, null, null,unloadTimeValue);
         });
 
         // Pause Form Submission
         document.getElementById("submitPauseReasonButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             const pauseReason = document.getElementById("pauseReason").value;
-            performAction('pause', batchId, pauseReason);
+            const pauseTime = document.getElementById("PauseTime").value; // Get the pause time from the input field
+            performAction('pause', batchId, pauseReason,null, pauseTime);
         });
     </script>
 </body>

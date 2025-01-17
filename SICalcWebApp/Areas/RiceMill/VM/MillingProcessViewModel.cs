@@ -7,7 +7,7 @@ namespace SICalcWebApp.Areas.RiceMill.VM
         public string MillBunkerName { get; set; }
         public string BatchId { get; set; }
         public string StaffName { get; set; }
-
+        public DateTime? StartTime { get; set; } // Current time (already set)
         public List<SelectListItem> Bunkers { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Batches { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Staffs { get; set; } = new List<SelectListItem>();

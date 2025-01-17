@@ -74,20 +74,20 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task PauseProcessAsync(string batchId, string pauseReason)
+        public async Task PauseProcessAsync(string batchId, string pauseReason, DateTime? PauseTime)
         {
             var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
             {
                 process.ProcessStatus = "Paused";
                 process.PauseReason = pauseReason;
-                process.PauseTime = DateTime.Now;
+                process.PauseTime = PauseTime;
 
                 _context.SortexProcesses.Update(process);
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task ResumeProcessAsync(string batchId)
+        public async Task ResumeProcessAsync(string batchId,DateTime? ResumeTime)
         {
 
 
@@ -95,9 +95,9 @@ namespace SICalcWebApp.Areas.RiceMill.Services
             if (process != null)
             {
                 process.ProcessStatus = "In Progress";
-                process.ResumeTime = DateTime.Now;
+                process.ResumeTime = ResumeTime;
 
-                // Accumulate the current pause duration into TotalDelayTime
+                //Accumulate the current pause duration into TotalDelayTime
                 if (process.PauseTime.HasValue)
                 {
                     var currentDelay = process.ResumeTime.Value - process.PauseTime.Value;
@@ -118,7 +118,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task EndProcessAsync(string batchId)
+        public async Task EndProcessAsync(string batchId, DateTime? EndTime)
         {
             var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
@@ -136,7 +136,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 }
 
                 // Update the end details after handling pause-related calculations
-                process.EndTime = DateTime.Now;
+                process.EndTime = EndTime;
                 process.ProcessStatus = "Completed";
 
                 _context.SortexProcesses.Update(process);

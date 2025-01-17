@@ -33,18 +33,23 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 // If there's an active process, redirect to the Dashboard to view the active process
                 return RedirectToAction("Dashboard", new { batchId = activeProcess.BatchId });
             }
+            var model = new HandiProcess
+            {
+                StartTime = DateTime.Now // Set default value
+            };
+
             var masterData = await _machineProcessService.GetMasterDataAsync();
             ViewBag.ProcessTypes = masterData.ProcessTypes;
             ViewBag.PaddyTypes = masterData.PaddyTypes;
             ViewBag.HandiTypes = masterData.HandiTypes;
             ViewBag.StaffNames = masterData.StaffNames;
+            return View(model); // Pass the model to the view
 
-            return View(new HandiProcess()); // Use Handi-specific view model
+            //return View(new HandiProcess()); // Use Handi-specific view model
         }
 
 
 
-        // POST: Start Handi Process
         [HttpPost]
         public async Task<IActionResult> StartHandi(HandiProcess model)
         {
@@ -54,9 +59,6 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 {
                     Console.WriteLine(error.ErrorMessage);
                 }
-
-
-
 
                 // Reload dropdowns in case of error
                 var masterData = await _machineProcessService.GetMasterDataAsync();
@@ -74,36 +76,40 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 return Json(new { success = false, message = "A process is already in progress or paused. Please wait until it completes." });
             }
 
+            // Handle HandiRunCount logic (default to 8 if null)
+            var handiRunCount = model.HandiRunCount ?? 8;
 
-
-
-
-
+            // Determine the Batch ID prefix based on the ProcessType
+            string batchPrefix = model.ProcessType?.ToUpper() switch
+            {
+                "ARWA" => "ARWA",
+                "USNA" => "USNA",
+                _ => "GENERAL" // Default prefix for unsupported process types
+            };
 
             // Create the Handi process and save it to the HandiProcess table
             var handiProcess = new HandiProcess
             {
-                BatchId = $"RICE-{_machineProcessService.GetNextBatchId()}",
+                BatchId = $"{batchPrefix}-{_machineProcessService.GetNextBatchId(batchPrefix)}",
                 ProcessType = model.ProcessType,
                 PaddyType = model.PaddyType,
                 HandiType = model.HandiType,
                 Temperature = model.Temperature,
                 Pressure = model.Pressure,
                 StaffName = model.StaffName,
-                StartTime = DateTime.Now,
+                StartTime = model.StartTime,
+                HandiRunCount = handiRunCount,
                 ProcessStatus = "In Progress"
             };
 
             // Save Handi Process
             await _machineProcessService.StartHandiProcessAsync(handiProcess);
 
-            // Pass BatchId to next machine for sharing
+            // Pass BatchId to the next machine for sharing
             TempData["BatchId"] = handiProcess.BatchId;
 
             return RedirectToAction("Dashboard", new { batchId = handiProcess.BatchId });
         }
-
-
 
 
 
@@ -115,27 +121,40 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
 
             var process = await _machineProcessService.GetHandiProcessAsync(batchId);
+            var emptyBunkers = _context.MillBunkers
+               .Where(bunker => bunker.Status == "EMPTY")
+               .Select(bunker => bunker.MillBName)  // Select only the Name property
+               .ToList();
+
+            // Pass the list to the view using ViewBag
+            ViewBag.EmptyBunkers = emptyBunkers;
+
+
+
             if (process == null)
             {
                 return RedirectToAction("Handi");
             }
 
             Console.WriteLine($"ProcessStatus in Dashboard: {process.ProcessStatus}"); // Debugging
+
+
+
             return View(process);
         }
 
         // Pause process for Handi machine
         [HttpPost]
-        public async Task<IActionResult> PauseHandi(string batchId, string pauseReason)
+        public async Task<IActionResult> PauseHandi(string batchId, string pauseReason, DateTime? pauseTime)
         {
             try
             {
-                Console.WriteLine($"Received Batch ID: {batchId}, Pause Reason: {pauseReason}"); // Debugging
+                Console.WriteLine($"Received Batch ID: {batchId}, Pause Reason: {pauseReason}, Pause Time: {pauseTime}"); // Debugging
 
-                if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason))
+                if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason) && pauseTime.HasValue)
                 {
                     // Pause the process
-                    await _machineProcessService.PauseProcessAsync(batchId, pauseReason);
+                    await _machineProcessService.PauseProcessAsync(batchId, pauseReason, pauseTime.Value);
 
                     return Json(new { success = true, message = "Process Paused" });
                 }
@@ -152,7 +171,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ResumeHandi(string batchId)
+        public async Task<IActionResult> ResumeHandi(string batchId, DateTime? resumeTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -161,7 +180,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _machineProcessService.ResumeProcessAsync(batchId);
+                await _machineProcessService.ResumeProcessAsync(batchId, resumeTime);
                 return Json(new { success = true, message = "Process resumed successfully" });
             }
             catch (Exception ex)
@@ -171,30 +190,9 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> EndHandi(string batchId)
-        //{
-        //    if (string.IsNullOrWhiteSpace(batchId))
-        //    {
-        //        return Json(new { success = false, message = "Invalid Batch ID" });
-        //    }
-
-        //    try
-        //    {
-        //        await _machineProcessService.EndProcessAsync(batchId);
-        //        TempData["BatchId"] = batchId; // Retain this for redirection later if needed
-        //        return Json(new { success = true, message = "Process ended successfully" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log exception here
-        //        return Json(new { success = false, message = "An error occurred while ending the process." });
-        //    }
-        //}
-
 
         [HttpPost]
-        public async Task<IActionResult> EndHandi(string batchId)
+        public async Task<IActionResult> EndHandi(string batchId, DateTime? endTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -221,7 +219,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
                 // Proceed with ending the Handi process if dryer is free
-                await _machineProcessService.EndProcessAsync(batchId);
+                await _machineProcessService.EndProcessAsync(batchId,endTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }
@@ -232,6 +230,25 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
         }
 
+
+
+
+
+
+        [HttpPost]
+        public IActionResult CompleteArwaProcess(string batchId, string unloadBunker, DateTime? endTime)
+        {
+            // Call CompleteArwaProcess and store its result in processCompleted
+            bool processCompleted = _machineProcessService.CompleteArwaProcess(batchId, unloadBunker, endTime);
+
+            // Check if the process was completed successfully
+            if (!processCompleted)
+            {
+                return Json(new { success = false, message = "Process or bunker update failed." });
+            }
+
+            return Json(new { success = true });
+        }
 
 
 

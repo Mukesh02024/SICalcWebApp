@@ -21,17 +21,7 @@
                     <span asp-validation-for="BatchId" class="text-danger"></span>
                 </div>
 
-               @*  <div class="form-group">
-                    <label asp-for="UnloadBunkerName">Unload Bunker</label>
-                    <select asp-for="UnloadBunkerName" class="form-control">
-                        <option value="">-- Unload Bunker --</option>
-                        @foreach (var staffName in ViewBag.UnloadingBunkers as List<string>)
-                        {
-                            <option value="@staffName">@staffName</option>
-                        }
-                    </select>
-                    <span asp-validation-for="UnloadBunkerName" class="text-danger"></span>
-                </div> *@
+        
             </div>
 
             <div class="col-md-6">
@@ -46,14 +36,28 @@
                     </select>
                     <span asp-validation-for="StaffName" class="text-danger"></span>
                 </div>
+            </div>
+        </div>
 
+        <div class="row">
+            <div class="col-md-6">
                 <div class="form-group">
                     <label asp-for="DuctiPressure">Ducty Pressure</label>
                     <input asp-for="DuctiPressure" class="form-control" type="number" placeholder="Enter Pressure" />
                     <span asp-validation-for="DuctiPressure" class="text-danger"></span>
                 </div>
-            </div>
-        </div>
+              </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="LoadTime">Start Time</label>
+                    <input asp-for="LoadTime" class="form-control" type="datetime-local" />
+                    <span asp-validation-for="LoadTime" class="text-danger"></span>
+                </div>
+             </div>
+
+         </div>
+          
         <div class="text-center mt-3">
             <button type="submit" class="btn btn-primary">Start Dryer Process</button>
         </div>
@@ -61,6 +65,29 @@
 </div>
 
 @section Scripts {
+
+   <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                      // Automatically set current date and time in local format
+                      const now = new Date();
+                      const formattedDateTime = now.getFullYear() + '-' +
+                          String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                          String(now.getDate()).padStart(2, '0') + 'T' +
+                          String(now.getHours()).padStart(2, '0') + ':' +
+                          String(now.getMinutes()).padStart(2, '0');
+
+                      const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
+                      datetimeFields.forEach((field) => {
+                          field.value = formattedDateTime;  // Set default to current date and time
+                          field.max = formattedDateTime;   // Restrict future date selection
+                          field.addEventListener("change", function () {
+                              field.blur(); // Remove focus to close the picker
+                          });
+                      });
+                  });
+
+     </script>
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

@@ -24,6 +24,10 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
         public async Task<IActionResult> DryerMachine()
         {
             var activeProcess = await _dryerService.GetActiveProcessAsync();
+            var model = new DryerProcess
+            {
+                LoadTime = DateTime.Now // Set default value
+            };
             if (activeProcess != null)
             {
                 // If there's an active process, redirect to the Dashboard to view the active process
@@ -35,7 +39,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             //ViewBag.UnloadingBunkers = masterData.MillBunkers;
             ViewBag.CompletedBatches = availableBatches;
 
-            return View(new DryerProcess()); // Use Dryer-specific view model
+            return View(model); // Use Dryer-specific view model
         }
 
         // POST: Start Dryer Process
@@ -61,7 +65,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 StaffName = model.StaffName,
                 //UnloadBunkerName = model.UnloadBunkerName,
                 DuctiPressure = model.DuctiPressure,
-                LoadTime = DateTime.Now,
+                LoadTime = model.LoadTime,
                 ProcessStatus = "In Progress"
             };
 
@@ -89,6 +93,17 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
 
 
+            //TimeZoneInfo localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"); // Replace with your desired time zone
+            //if (process.LoadTime.HasValue)
+            //{
+            //    process.LoadTime = TimeZoneInfo.ConvertTimeFromUtc(process.LoadTime.Value, localTimeZone);
+            //}
+            //if (process.UnloadTime.HasValue)
+            //{
+            //    process.UnloadTime = TimeZoneInfo.ConvertTimeFromUtc(process.UnloadTime.Value, localTimeZone);
+            //}
+
+
             var emptyBunkers = await _dryerService.GetEmptyBunkersAsync();
             ViewBag.SortexList = emptyBunkers; // Pass the empty bunkers to the view
            
@@ -99,7 +114,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> PauseDryer(string batchId, string pauseReason)
+        public async Task<IActionResult> PauseDryer(string batchId, string pauseReason,DateTime? pauseTime)
         {
             try
             {
@@ -108,7 +123,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(pauseReason))
                 {
                     // Pause the process
-                    await _dryerService.PauseProcessAsync(batchId, pauseReason);
+                    await _dryerService.PauseProcessAsync(batchId, pauseReason, pauseTime);
 
                     return Json(new { success = true, message = "Process Paused" });
                 }
@@ -125,7 +140,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> ResumeDryer(string batchId)
+        public async Task<IActionResult> ResumeDryer(string batchId,DateTime? resumeTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -134,7 +149,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _dryerService.ResumeProcessAsync(batchId);
+                await _dryerService.ResumeProcessAsync(batchId, resumeTime);
                 return Json(new { success = true, message = "Process resumed successfully" });
             }
             catch (Exception ex)
@@ -145,7 +160,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EndDryer(string batchId,string unloadBunkerName)
+        public async Task<IActionResult> EndDryer(string batchId,string unloadBunkerName,DateTime? UnloadTime)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -154,7 +169,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _dryerService.EndProcessAsync(batchId, unloadBunkerName);
+                await _dryerService.EndProcessAsync(batchId, unloadBunkerName, UnloadTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }
