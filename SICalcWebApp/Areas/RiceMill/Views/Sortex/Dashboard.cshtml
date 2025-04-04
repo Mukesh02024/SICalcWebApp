@@ -4,8 +4,6 @@
 @{
 }
 
-
-
 @using SICalcWebApp.Areas.RiceMill.Utility
 @model SICalcWebApp.Areas.RiceMill.Models.SortexProcess
 
@@ -120,6 +118,14 @@
                 <input id="EndTime" class="form-control form-control-sm small-input" type="datetime-local" />
             </div>
 
+            <div class="form-group">
+                <label for="EndWeight">End Weight:</label>
+                <input id="EndWeight" class="form-control form-control-sm small-input" type="number" step="0.01" min="0.1" />
+            </div>
+
+
+
+
             <button id="submitEndButton" class="btn btn-primary">Submit</button>
         </div>
 
@@ -168,26 +174,21 @@
         // Show Pause Form
         function showPauseForm() {
             document.getElementById("pauseReasonForm").style.display = "block";
-                document.getElementById("endForm").style.display = "none";
-                           document.getElementById("resumeForm").style.display = "none";
+            document.getElementById("endForm").style.display = "none";
+            document.getElementById("resumeForm").style.display = "none";
         }
 
         // Perform Action (Pause, Resume, End)
-        function performAction(action, batchId, pauseReason = null,pauseTime=null,resumeTime=null,endTime=null) {
+        function performAction(action, batchId, pauseReason = null,pauseTime=null,resumeTime=null,endTime=null, endWeight = null) {
+               const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
             const urlMap = {
-                pause: '/RiceMill/Sortex/PauseSortex',
-                resume: '/RiceMill/Sortex/ResumeSortex',
-                end: '/RiceMill/Sortex/EndSortex',
+                pause: `/${tenant}/RiceMill/Sortex/PauseSortex`,
+                resume: `/${tenant}/RiceMill/Sortex/ResumeSortex`,
+                end: `/${tenant}/RiceMill/Sortex/EndSortex`,
 
             };
     
-            // const body = pauseReason
-            //     ? `batchId=${encodeURIComponent(batchId)}&pauseReason=${encodeURIComponent(pauseReason)}&pauseTime=${encodeURIComponent(pauseTime)}`
-            //     : `batchId=${encodeURIComponent(batchId)}`;
-
-
-
-
+  
 
          let body = `batchId=${encodeURIComponent(batchId)}`;
 
@@ -206,19 +207,8 @@
                {
        
             body += `&endTime=${encodeURIComponent(endTime)}`;
+             body += `&endWeight=${encodeURIComponent(endWeight)}`;
                }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -231,7 +221,7 @@
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.success) {
-                        window.location.href = `/RiceMill/Sortex/Dashboard?batchId=${batchId}`;
+                        window.location.href = `/${tenant}/RiceMill/Sortex/Dashboard?batchId=${batchId}`;
                     } else {
                         alert(data.message);
                     }
@@ -250,10 +240,6 @@
         });
 
 
-
-        
-
-
         document.getElementById("submitResumeButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
             
@@ -261,19 +247,18 @@
             performAction('resume', batchId, null,null,resumeTime);
         });
 
-
-
-
         document.getElementById("submitEndButton").addEventListener("click", function () {
             const batchId = "@Model.BatchId"; // Dynamically populated from the model
 
             const endTime=document.getElementById("EndTime").value;
-            performAction('end', batchId, null,null,null,endTime);
+            const endWeight = document.getElementById("EndWeight").value; // Get EndWeight value
+
+                 if (!endWeight || parseFloat(endWeight) < 0.1) {
+            alert("End Weight is required and must be at least 0.1.");
+            return;
+        }
+            performAction('end', batchId, null,null,null,endTime, endWeight);
         });
-
-
-       
-
 
     </script>
 </body>

@@ -54,6 +54,8 @@
 @section Scripts {
     <script>
         function confirmDelete(id) {
+
+               const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
             if (confirm("Are you sure you want to delete this record?")) {
                 // Get the anti-forgery token value from the hidden form
                 const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
@@ -65,22 +67,26 @@
                 }
 
                 // Make a POST request to the server to delete the record
-                fetch(`/RiceMill/PlantOperate/DeletePaddyType/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': token // Include the anti-forgery token in the request
-                    }
-                })
-                    .then(response => response.json()) // Get JSON response
-                    .then(data => {
-                        if (data.success) {
-                            alert("Record deleted successfully!");
-                            location.reload(); // Reload the page after successful deletion
-                        } else {
-                            alert("Failed to delete the record: " + (data.message || "Unknown error"));
-                        }
-                    })
+                    fetch(`/${tenant}/RiceMill/PlantOperate/DeletePaddyType/${id}`, {
+            method: 'POST',
+            credentials: 'same-origin', // ✅ Ensures cookies (auth info) are included
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token, // ✅ Required for anti-forgery validation
+                'X-Requested-With': 'XMLHttpRequest' // ✅ Helps backend identify AJAX request
+            },
+            body: JSON.stringify({}) // ✅ Required to send valid JSON body even if empty
+        })
+
+                           .then(response => {
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+                return response.json(); // ✅ Only parse if it's valid JSON
+            } else {
+                throw new Error("Server did not return JSON (maybe redirected to login)");
+            }
+        })
+
                     .catch(error => {
                         console.error('Error:', error);
                         alert("An error occurred while trying to delete the record.");

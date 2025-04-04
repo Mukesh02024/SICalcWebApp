@@ -21,6 +21,8 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         [Required(ErrorMessage = "Staff Name is required.")]
          public string StaffName { get; set; } // Dropdown from Master Data
 
+        [Required(ErrorMessage = "SaleType is required.")]
+        public string SaleType { get; set; } // Dropdown from Master Data
         public string? ProcessStatus { get; set; } // Track process status (e.g., "In Progress", "Completed")
 
         // Tracking delay times

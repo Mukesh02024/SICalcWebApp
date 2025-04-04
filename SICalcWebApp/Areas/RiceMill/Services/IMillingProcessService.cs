@@ -17,7 +17,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         Task ResumeProcessAsync(string batchId, DateTime? ResumeTime);
 
 
-        Task EndProcessAsync(string batchId,string SortexBunker, DateTime? EndTime);
+        Task EndProcessAsync(string batchId, DateTime? EndTime);
 
 
         Task<MillingProcess> GetActiveProcessAsync();

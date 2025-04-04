@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
 
 namespace SICalcWebApp.Areas.RiceMill.Models
 {
@@ -13,6 +14,9 @@ namespace SICalcWebApp.Areas.RiceMill.Models
 
         public DateTime? EndTime { get; set; }
 
+       
+        public decimal? EndWeight { get; set; }
+
         [Required(ErrorMessage = "Sortex Bunker Name is required.")]
         public string SortexBunkerName { get; set; } // Dropdown from Master Data
 
@@ -26,6 +30,8 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         public DateTime? PauseTime { get; set; } // Track when the process was paused
         public DateTime? ResumeTime { get; set; } // Track when the process was resumed
 
+        [Required(ErrorMessage = "SaleType is required.")]
+        public string SaleType { get; set; } // Dropdown from Master Data
         public TimeSpan? TotalDelayTime { get; set; }
 
         // Computed property to calculate total delay time

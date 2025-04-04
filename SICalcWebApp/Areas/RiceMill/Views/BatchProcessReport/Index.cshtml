@@ -1,0 +1,261 @@
+﻿@{
+    ViewData["Title"] = "Batch Process Report";
+}
+
+<style>
+    /* Apply striping effect */
+    #reportTable tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    /* Ensure text does not wrap */
+    #reportTable th,
+    #reportTable td {
+        white-space: nowrap;
+    }
+
+    /* Reduce font size */
+    #reportTable {
+        font-size: 12px;
+    }
+
+        /* Remove cell padding */
+        #reportTable th,
+        #reportTable td {
+            padding: 2px 5px;
+        }
+</style>
+
+
+
+<h2>Batch Process Report</h2>
+
+<!-- Filters -->
+<div class="row mb-3">
+    <div class="col-md-2">
+        <label for="processType" class="form-label">Process Type:</label>
+        <select id="processType" class="form-control" onchange="toggleDryerColumns()">
+            <option value="" selected disabled>Select</option>
+            <option value="USNA">USNA</option>
+            <option value="ARWA">ARWA</option>
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="fromDate" class="form-label">From Date:</label>
+        <input type="date" id="fromDate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+        <label for="toDate" class="form-label">To Date:</label>
+        <input type="date" id="toDate" class="form-control">
+    </div>
+
+    <div class="col-md-2">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-primary w-100" onclick="loadReport()">Load Report</button>
+    </div>
+
+
+    <div class="col-md-2">
+        <label class="form-label">&nbsp;</label>
+        <button class="btn btn-success w-100" onclick="exportToExcel()">Export to Excel</button>
+    </div>
+
+
+</div>
+
+
+<div class="row mb-3">
+    <h2 id="batchCount"></h2> <!-- Dynamic batch count display -->
+</div>
+
+<!-- Export Button -->
+
+
+<!-- Data Table -->
+<div class="table-responsive" id="tableContainer" style="display: none;">
+    <table class="table table-bordered" id="reportTable">
+        <thead>
+            <tr>
+                <th>Batch ID</th>
+                <th>Process Type</th>
+                <th>Paddy Type</th>
+                <th>Handi Type</th>
+                <th>Pressure</th>
+                <th>Handi Staff</th>
+                <th>Handi Start</th>
+                <th>Handi End</th>
+                <th>Handi Delay</th>
+                <th>Handi Taken Time</th>
+                <th class="dryer-column">Dryer Load</th>
+                <th class="dryer-column">Dryer Unload</th>
+                <th class="dryer-column">Dryer Unload Bunk</th>
+                <th class="dryer-column">Dryer Staff</th>
+                <th class="dryer-column">Ducti Pressure</th>
+                <th class="dryer-column">Dryer Delay</th>
+                <th class="dryer-column">Dryer Taken Time</th>
+                <th class="dryer-column">Dryer - Handi </th>
+                <th>Mill Start</th>
+                <th>Mill End</th>
+                <th>Mill Bunker</th>
+                <th>Sortex Unload Bunk</th>
+                <th>Milling Staff</th>
+                <th>Milling Delay</th>
+                <th>Milling Taken Time</th>
+                <th>Sortex Start</th>
+                <th>Sortex End</th>
+                <th>Sortex Load Bunk</th>
+                <th>Sortex Staff</th>
+                <th>Sortex Delay</th>
+                <th>Sortex Taken Time</th>
+            </tr>
+        </thead>
+        <tbody id="reportBody">
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- JavaScript -->
+<script>
+    function loadReport() {
+        let processType = document.getElementById("processType").value;
+        let fromDate = document.getElementById("fromDate").value;
+        let toDate = document.getElementById("toDate").value;
+        const tenant = "@(Context.Session.GetString("Tenant"))";
+
+        if(!processType)
+        {
+            alert("Please select a Process Type.");
+        return;
+
+        }
+        if (!fromDate || !toDate) {
+            alert("Please select both dates.");
+            return;
+        }
+
+        fetch(`/${tenant}/RiceMill/BatchProcessReport/GetBatchProcessReport?processType=${processType}&fromDate=${fromDate}&toDate=${toDate}`)
+            .then(response => response.json())
+            .then(data => {
+                 console.log("API Response:", data); // Debugging
+                let tbody = document.getElementById("reportBody");
+                let tableContainer = document.getElementById("tableContainer");
+                tbody.innerHTML = "";
+                  // ✅ Update Batch Count
+       document.getElementById("batchCount").innerText = `Total Selected  Batches: ${data.length}`;
+                if (data.length > 0) {
+                tableContainer.style.display = "block"; // Show table
+
+                data.forEach(report => {
+                    let row = `<tr>
+                        <td>${report.batchId || '-'}</td>
+                        <td>${report.processType || '-'}</td>
+                        <td>${report.paddyType || '-'}</td>
+                        <td>${report.handiType || '-'}</td>
+                        <td>${report.pressure || '-'}</td>
+                        <td>${report.handiStaff || '-'}</td>
+                        <td>${report.handiStartTime ? new Date(report.handiStartTime).toLocaleString() : '-'}</td>
+                        <td>${report.handiEndTime ? new Date(report.handiEndTime).toLocaleString() : '-'}</td>
+                        <td>${report.handiDelay?.toFixed(2) || '-'}</td>
+                        <td>${report.handiTakenTime?.toFixed(2) || '-'}</td>
+                        <td class="dryer-column">${report.dryerLoadTime ? new Date(report.dryerLoadTime).toLocaleString() : '-'}</td>
+                        <td class="dryer-column">${report.dryerUnloadTime ? new Date(report.dryerUnloadTime).toLocaleString() : '-'}</td>
+                        <td class="dryer-column">${report.dryerUnloadBunk || '-'}</td>
+                        <td class="dryer-column">${report.dryerStaff || '-'}</td>
+                        <td class="dryer-column">${report.ductiPressure || '-'}</td>
+                        <td class="dryer-column">${report.dryerDelay?.toFixed(2) || '-'}</td>
+                        <td class="dryer-column">${report.dryerTakenTime?.toFixed(2) || '-'}</td>
+                          <td class="dryer-column">${report.dryerHandiTimeDifference?.toFixed(2) || '-'}</td>
+                        <td>${report.millStartTime ? new Date(report.millStartTime).toLocaleString() : '-'}</td>
+                        <td>${report.millEndTime ? new Date(report.millEndTime).toLocaleString() : '-'}</td>
+                        <td>${report.millBunkerName || '-'}</td>
+                        <td>${report.sortexUnloadBunk || '-'}</td>
+                        <td>${report.millingStaff || '-'}</td>
+                        <td>${report.millingDelay?.toFixed(2) || '-'}</td>
+                        <td>${report.millingTakenTime?.toFixed(2) || '-'}</td>
+                        <td>${report.sortexStartTime ? new Date(report.sortexStartTime).toLocaleString() : '-'}</td>
+                        <td>${report.sortexEndTime ? new Date(report.sortexEndTime).toLocaleString() : '-'}</td>
+                        <td>${report.sortexloadBunk || '-'}</td>
+                        <td>${report.sortexStaff || '-'}</td>
+                        <td>${report.sortexDelay?.toFixed(2) || '-'}</td>
+                        <td>${report.sortexTakenTime?.toFixed(2) || '-'}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+
+                toggleDryerColumns();
+                } else {
+                    tableContainer.style.display = "none"; // Hide table
+               
+                }
+            })
+            .catch(error => console.error('Error loading data:', error));
+    }
+
+    function toggleDryerColumns() {
+        let processType = document.getElementById("processType").value;
+        let dryerColumns = document.querySelectorAll(".dryer-column");
+        dryerColumns.forEach(col => col.style.display = processType === "ARWA" ? "none" : "table-cell");
+    }
+
+
+
+
+
+
+        function exportToExcel() {
+        let processType = document.getElementById("processType").value;
+        let fromDate = document.getElementById("fromDate").value;
+        let toDate = document.getElementById("toDate").value;
+        const tenant = "@(Context.Session.GetString("Tenant"))"; // Get tenant dynamically
+
+         if(!processType)
+        {
+            alert("Please select a Process Type.");
+        return;
+
+        }
+
+        if (!fromDate || !toDate) {
+            alert("Please select both dates.");
+            return;
+        }
+
+        // Construct the API URL with dynamic parameters
+        let apiUrl = `/${tenant}/RiceMill/BatchProcessReport/ExportToExcel?processType=${encodeURIComponent(processType)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+
+        // Fetch the Excel file
+        fetch(apiUrl, {
+            method: "GET",
+            headers: {
+                "Accept": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to download Excel file.");
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create a link element to download the file
+            let link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `BatchProcessReport_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        })
+        .catch(error => {
+            console.error("Error exporting Excel:", error);
+            alert("Failed to export Excel.");
+        });
+    }
+
+
+
+
+
+</script>

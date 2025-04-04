@@ -85,6 +85,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 StaffName = model.StaffName,
                 SortexBunkerName = model.SortexBunkerName,
                 StartTime = model.StartTime,
+                SaleType= model.SaleType,
                 ProcessStatus = "In Progress"
             };
 
@@ -177,7 +178,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> EndSortex(string batchId, DateTime? EndTime)
+        public async Task<IActionResult> EndSortex(string batchId, DateTime? EndTime, decimal Endweight)
         {
             if (string.IsNullOrWhiteSpace(batchId))
             {
@@ -186,7 +187,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _sortexService.EndProcessAsync(batchId, EndTime);
+                await _sortexService.EndProcessAsync(batchId, EndTime,Endweight);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }

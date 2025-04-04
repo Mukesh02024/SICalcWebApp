@@ -70,11 +70,19 @@
                 </div>
 
                 <div class="row mb-3">
-                    <!-- Temperature -->
+                    <!-- Water  -->
                     <div class="col-md-4">
-                        <label asp-for="Temperature">Temperature</label>
-                        <input asp-for="Temperature" class="form-control" type="number" placeholder="Enter Temperature" />
-                        <span asp-validation-for="Temperature" class="text-danger"></span>
+                        <label asp-for="WaterType">WaterType</label>
+                        @* <input asp-for="WaterType" class="form-control" type="text" placeholder="Enter Watertype" /> *@
+
+                        <select asp-for="WaterType" class="form-control">
+                            <option value="">-- Select Water Type --</option>
+                            @foreach (var waterType in ViewBag.WaterTypes as List<string>)
+                            {
+                                <option value="@waterType">@waterType</option>
+                            }
+                        </select>
+                        <span asp-validation-for="WaterType" class="text-danger"></span>
                     </div>
 
                     <!-- Pressure -->
@@ -83,6 +91,9 @@
                         <input asp-for="Pressure" class="form-control" type="number" placeholder="Enter Pressure" />
                         <span asp-validation-for="Pressure" class="text-danger"></span>
                     </div>
+
+              
+
 
                     <div class="col-md-4">
                         <label asp-for="StartTime">Start-Time</label>
@@ -94,8 +105,10 @@
                 </div>
                 <!-- Number of Handi Run (conditionally visible) -->
                 <div class="form-group" id="handiRunField" style="display: none;">
-                    <label for="HandiRunCount">Number of Handi Run</label>
-                    <input type="number" id="HandiRunCount" name="HandiRunCount" class="form-control" />
+              @*       <div class="form-group" id="handiRunField"> *@
+                    <label for="PaddyWeight">PaddyWeight </label>
+                    <input type="number" id="HandiRunCount" name="PaddyWeight" class="form-control" />
+                    <span asp-validation-for="PaddyWeight" class="text-danger"></span>
                 </div>
 
 
@@ -114,6 +127,8 @@
 
    
     <script>
+               
+
 
         document.addEventListener("DOMContentLoaded", function () {
                   // Automatically set current date and time in local format
@@ -135,20 +150,25 @@
               });
 
 
-
-
-
-
         // JavaScript to show/hide "Number of Handi Run" field based on selected Process Type
         document.getElementById("processTypeSelect").addEventListener("change", function () {
             var processType = this.value;
             var handiRunField = document.getElementById("handiRunField");
 
+                var handiRunInput = document.getElementById("HandiRunCount");
+
+
             // Show the field if ARWA is selected, else hide it
             if (processType === "ARWA") {
                 handiRunField.style.display = "block";
-            } else {
+                    handiRunInput.setAttribute("required", "required"); // Enforce required field
+            } else if(processType === "USNA") {
+                handiRunField.style.display = "block";
+                    handiRunInput.setAttribute("required", "required"); // Enforce required field
+            }
+            else{
                 handiRunField.style.display = "none";
+                handiRunInput.removeAttribute("required"); // Remove validation if hidden
             }
         });
 

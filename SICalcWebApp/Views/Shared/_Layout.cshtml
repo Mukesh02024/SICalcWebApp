@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var tenant = ViewContext.HttpContext.Request.RouteValues["tenant"]?.ToString();
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -8,6 +12,8 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site.css" />
@@ -15,6 +21,8 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+
 
     <!-- Custom CSS for layout -->
     <style>
@@ -145,18 +153,23 @@
                     @if (User.IsInRole(SD.Role_Super_Admin))
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@Url.Action("Index", "Home")">
+                            <a class="nav-link text-light"
+                               asp-area="Identity"
+                               asp-page="/Account/Register"
+                               asp-route-returnUrl="@Url.Action("Index", "Home")"
+                               asp-route-tenant="@tenant">
                                 Register as a new user
                             </a>
+                          
                         </li>
                     }
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FeedRateAvg" asp-action="Index">GetCalculation</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="TPDInfo" asp-action="TdpList">Kiln Service</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FC" asp-action="FcList">FC Service</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FcInfo" asp-action="FCInfoList">FeedRateService</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="PriceOfM" asp-action="PriceList">Expense Service</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="IronType" asp-action="IronList">Add-Iron-Type</a></li>
-                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="InputSi" asp-action="OperandList">Add Material Details</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FeedRateAvg" asp-action="Index" asp-route-tenant="@tenant">GetCalculation</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="TPDInfo" asp-action="TdpList" asp-route-tenant="@tenant">Kiln Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FC" asp-action="FcList" asp-route-tenant="@tenant">FC Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="FcInfo" asp-action="FCInfoList" asp-route-tenant="@tenant">FeedRateService</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="PriceOfM" asp-action="PriceList" asp-route-tenant="@tenant">Expense Service</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="IronType" asp-action="IronList" asp-route-tenant="@tenant">Add-Iron-Type</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="SICalculator" asp-controller="InputSi" asp-action="OperandList" asp-route-tenant="@tenant">Add Material Details</a></li>
                 </ul>
             </div>
         }
@@ -182,22 +195,24 @@
 
                 @if (User.IsInRole(SD.Role_Checker_Admin) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
                 {
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Search">Search Date Wise</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="PivotSummary">Search Group Wise</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Search" asp-route-tenant="@tenant">Search Date Wise</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="PivotSummary" asp-route-tenant="@tenant">Search Group Wise</a></li>
                 }
 
                 @if (User.IsInRole(SD.Role_Mill_Supervisor) || User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin))
                 {
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create">Entry Daily Basis</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Feeding" asp-action="ListFeed">Entry Feeding </a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create" asp-route-tenant="@tenant">Entry Daily Basis</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Feeding" asp-action="ListFeed" asp-route-tenant="@tenant">Entry Feeding </a></li>
 
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HandiMachine" asp-action="Handi">Start Handi</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Dryer" asp-action="DryerMachine">Start Dryer </a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HandiMachine" asp-action="Handi" asp-route-tenant="@tenant">Start Handi</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Dryer" asp-action="DryerMachine" asp-route-tenant="@tenant">Start Dryer </a></li>
 
 
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Milling" asp-action="StartMilling">Start Milling</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Sortex" asp-action="SortexMachine">Start Sortex </a></li>
-
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Milling" asp-action="StartMilling" asp-route-tenant="@tenant">Start Milling</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="Sortex" asp-action="SortexMachine" asp-route-tenant="@tenant">Start Sortex </a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MachineStatus" asp-action="Index" asp-route-tenant="@tenant">Process Dashboard</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillQuality" asp-action="Index" asp-route-tenant="@tenant">Milling Quality</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillQuality" asp-action="SortexQuality" asp-route-tenant="@tenant">Sortex Quality</a></li>
                 }
             </ul>
         </div>
@@ -216,20 +231,20 @@
                     <i class="fa-solid fa-database"></i> MasterData
                 </a>
                    <ul class="sub-menu" id="sub-menu-3">
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListFeedB">Feeding-Bunker</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="StaffList">Staff-List</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="PaddyTypeList">Paddy-Type</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create" asp-route-tenant="@tenant">Create Group</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create" asp-route-tenant="@tenant">Create Item</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListFeedB" asp-route-tenant="@tenant">Feeding-Bunker</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="StaffList" asp-route-tenant="@tenant">Staff-List</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="PaddyTypeList" asp-route-tenant="@tenant">Paddy-Type</a></li>
 
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListMillBunekr">MillBunker</a></li>
-
-                   
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListSortexBunker">Sortex Bunker</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListMillBunekr" asp-route-tenant="@tenant">MillBunker</a></li>
 
 
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListPMethod">Milling Process</a></li>
-                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListHandi">Handi Type</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListSortexBunker" asp-route-tenant="@tenant">Sortex Bunker</a></li>
+
+
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListPMethod" asp-route-tenant="@tenant">Milling Process</a></li>
+                    <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="PlantOperate" asp-action="ListHandi" asp-route-tenant="@tenant">Handi Type</a></li>
 
 
                     
@@ -244,30 +259,7 @@
 
 
 
-        @*  <!-- RiceMill Section -->
-        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) )
-        {
-        <div class="menu-item">
-        <a href="#" class="menu-title" data-toggle="sub-menu-2">
-        <i class="fas fa-seedling"></i> RiceMill
-        </a>
-        <ul class="sub-menu" id="sub-menu-2">
-        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="GroupMill" asp-action="Create">Create Group</a></li>
-        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="MillItem" asp-action="Create">Create Item</a></li>
-
-        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) || User.IsInRole(SD.Role_Checker_Admin))
-        {
-        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Search">Search Date Wise</a></li>
-        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="PivotSummary">Search Group Wise</a></li>
-        }
-
-        @if (User.IsInRole(SD.Role_Mill_Admin) || User.IsInRole(SD.Role_Super_Admin) || User.IsInRole(SD.Role_Mill_Supervisor))
-        {
-        <li><a class="nav-link text-light" asp-area="RiceMill" asp-controller="HmaliInput" asp-action="Create">Entry Daily Basis</a></li>
-        }
-        </ul>
-        </div>
-        } *@
+ 
     </div>
 
     <!-- Main Content -->
@@ -296,12 +288,15 @@
 
     <script>
         // Toggle sidebar visibility
+
+        document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("sidebarToggle").addEventListener("click", function () {
             var sidebar = document.getElementById("sidebar");
             var content = document.getElementById("content");
             sidebar.classList.toggle("hide");
             content.classList.toggle("shrink");
         });
+         });
 
         // Toggle sub-menus
         document.querySelectorAll('.menu-title').forEach(function (menuTitle) {

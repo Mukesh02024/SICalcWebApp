@@ -37,12 +37,18 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             var model = new MillingProcessViewModel
             {
+          
                 Bunkers = await _millingProcessService.GetOccupiedBunkersAsync(),
+                SortexBunkerList = (await _millingProcessService.GetEmptySortexBunkersAsync())
+            .Select(s => new SelectListItem { Value = s, Text = s })
+            .ToList(),
                 Batches = new List<SelectListItem>(), // Initialize with an empty list
                 Staffs = await GetStaffList(),
           
            
             };
+
+      
 
             return View(model);
         }
@@ -58,6 +64,9 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 // Reload dropdowns if there are validation errors
                 model.Bunkers = await _millingProcessService.GetOccupiedBunkersAsync();
                 model.Staffs = await GetStaffList();
+                model.SortexBunkerList = (await _millingProcessService.GetEmptySortexBunkersAsync())
+           .Select(s => new SelectListItem { Value = s, Text = s })
+           .ToList();
                 return View(model);
             }
 
@@ -68,6 +77,8 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 StaffName = model.StaffName,
                 MillBunkerName = model.MillBunkerName,
                 StartTime = model.StartTime,
+                SaleType = model.SaleType,
+             SortexBunkerName=model.SortexBunkerName,
                 ProcessStatus = "In Progress"
             };
 
@@ -173,7 +184,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
             try
             {
-                await _millingProcessService.EndProcessAsync(batchId, SortexBunker, EndTime);
+                await _millingProcessService.EndProcessAsync(batchId,EndTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
                 return Json(new { success = true, message = "Process ended successfully" });
             }

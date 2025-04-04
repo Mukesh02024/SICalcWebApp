@@ -10,5 +10,7 @@
 
         // Set LastUpdated to nullable if you want to handle it automatically
         public DateTime LastUpdated { get; set; } = DateTime.Now;  // Default value set when adding a new record
+
+        public string? BatchId { get; set; }  // Nullable to allow for empty state
     }
 }

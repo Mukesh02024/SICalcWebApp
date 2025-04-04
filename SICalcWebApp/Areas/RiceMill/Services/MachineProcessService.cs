@@ -202,7 +202,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                                     .OrderByDescending(p => p.HandiProcessId)
                                     .FirstOrDefault();
 
-            int nextBatchId = 1000; // Default starting value
+            int nextBatchId = 1; // Default starting value
 
             if (lastBatch != null)
             {

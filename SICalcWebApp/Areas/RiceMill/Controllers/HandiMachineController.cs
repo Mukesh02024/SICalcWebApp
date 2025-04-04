@@ -43,6 +43,8 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             ViewBag.PaddyTypes = masterData.PaddyTypes;
             ViewBag.HandiTypes = masterData.HandiTypes;
             ViewBag.StaffNames = masterData.StaffNames;
+            ViewBag.WaterTypes = new List<string> { "New Water", "Old Water" };
+
             return View(model); // Pass the model to the view
 
             //return View(new HandiProcess()); // Use Handi-specific view model
@@ -77,7 +79,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             }
 
             // Handle HandiRunCount logic (default to 8 if null)
-            var handiRunCount = model.HandiRunCount ?? 8;
+            //var handiRunCount = model.HandiRunCount ?? 8;
 
             // Determine the Batch ID prefix based on the ProcessType
             string batchPrefix = model.ProcessType?.ToUpper() switch
@@ -94,11 +96,11 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 ProcessType = model.ProcessType,
                 PaddyType = model.PaddyType,
                 HandiType = model.HandiType,
-                Temperature = model.Temperature,
+                WaterType = model.WaterType,
                 Pressure = model.Pressure,
                 StaffName = model.StaffName,
                 StartTime = model.StartTime,
-                HandiRunCount = handiRunCount,
+                PaddyWeight=model.PaddyWeight,
                 ProcessStatus = "In Progress"
             };
 
@@ -212,7 +214,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 bool areAllBatchesInDryerProcess = await _machineProcessService.AreAllCompletedBatchesInDryerProcessAsync();
                 if (!areAllBatchesInDryerProcess)
                 {
-                    return Json(new { success = false, message = "Not all completed batches are available in the Dryer process." });
+                    return Json(new { success = false, message = "Dryer unavailable or pending batch in process." });
                 }
 
 

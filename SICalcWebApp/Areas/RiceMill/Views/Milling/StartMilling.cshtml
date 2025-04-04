@@ -31,8 +31,24 @@
         </div>
 
         <div class="row mb-3">
+
+            <!-- Sortex Name -->
+            <div class="col-md-4">
+                <label for="SortexBunkerName" class="form-label">Sortex Name</label>
+                <select id="SortexBunkerName" name="SortexBunkerName" class="form-select" asp-for="SortexBunkerName" asp-items="Model.SortexBunkerList">
+                    <option value="">Select Sortex</option>
+                </select>
+                <span asp-validation-for="SortexBunkerName" class="text-danger"></span>
+            </div>
+
+
+
+
+
+
+
             <!-- Staff Name -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="StaffName" class="form-label">Staff Name</label>
                 <select id="StaffName" name="StaffName" class="form-select">
                     <option value="">Select Staff</option>
@@ -45,7 +61,7 @@
             </div>
 
             <!-- Start Time -->
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label asp-for="StartTime">Start Time</label>
                 <input asp-for="StartTime" class="form-control" type="datetime-local" id="startTime" />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
@@ -54,7 +70,23 @@
                 <input asp-for="StartTime" type="datetime-local"  style="width: 200px; padding:0px;" />
                 <span asp-validation-for="StartTime" class="text-danger"></span> *@
             </div>
+
+            <div class="col-md-4"> 
+             
+                        <label for="SaleType" class="form-label">Sale Type</label>
+                        <select id="SaleType" name="SaleType" class="form-select">
+                            <option value="">--Sale Type --</option>
+                            <option value="Freesale">FREESALE</option>
+                            <option value="CMR">CMR</option>
+                        </select>
+                        <span asp-validation-for="SaleType" class="text-danger"></span>
+
+            </div>
+
+
         </div>
+
+
         <button type="submit" class="btn btn-primary w-100">Start Milling</button>
     </form>
 </div>

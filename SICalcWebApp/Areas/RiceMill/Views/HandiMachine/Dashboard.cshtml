@@ -260,6 +260,7 @@
             const batchId = "@Model.BatchId";
             const unloadBunker = document.getElementById("unloadBunker").value;
                  const endTime = document.getElementById("endTimeInput").value; // End Time from input field
+                      const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
 
             if (!unloadBunker) {
                 alert("Please select an unload bunker.");
@@ -282,8 +283,9 @@
                 .then((data) => {
                     if (data.success) {
                         alert('Process completed successfully.');
-                        window.location.href = `/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
-                    } else {
+                            window.location.href = `/${tenant}/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
+                    } 
+                    else {
                         alert(data.message || 'Failed to complete process.');
                     }
                 })
@@ -309,10 +311,18 @@
         // Perform Action (Pause, Resume, End)
 
     function performAction(action, batchId, data = null) {
+
+            const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
+           
             const urlMap = {
-                pause: '/RiceMill/HandiMachine/PauseHandi',
-                resume: '/RiceMill/HandiMachine/ResumeHandi',
-                end: '/RiceMill/HandiMachine/EndHandi',
+
+
+                     pause: `/${tenant}/RiceMill/HandiMachine/PauseHandi`,
+                     resume: `/${tenant}/RiceMill/HandiMachine/ResumeHandi`,
+                      end: `/${tenant}/RiceMill/HandiMachine/EndHandi`,
+                    // pause: '/${tenant}/RiceMill/HandiMachine/PauseHandi',
+                    // resume: '/${tenant}/RiceMill/HandiMachine/ResumeHandi',
+                    // end: '/${tenant}/RiceMill/HandiMachine/EndHandi',
             };
 
                  let body = `batchId=${encodeURIComponent(batchId)}`;
@@ -338,7 +348,8 @@
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.success) {
-                        window.location.href = `/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
+                        // window.location.href = `/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
+                            window.location.href = `/${tenant}/RiceMill/HandiMachine/Dashboard?batchId=${batchId}`;
                     } else {
                         alert(data.message);
                     }

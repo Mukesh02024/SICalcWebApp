@@ -137,8 +137,6 @@
 
     <script>
 
-
-
                document.addEventListener("DOMContentLoaded", function () {
             // Automatically set current date and time in local format
             const now = new Date();
@@ -159,22 +157,14 @@
         });
 
 
-
-
-
-
-
-
-
           function showResumeForm() {
             document.getElementById("resumeTimeForm").style.display = "block";
                       document.getElementById("pauseReasonForm").style.display = "none";
 
-           document.getElementById("endForm").style.display = "none";
-
-        
+           document.getElementById("endForm").style.display = "none"; 
              
         }
+
 
         function submitResumeTime() {
                 const batchId = "@Model.BatchId"; // Populate dynamically
@@ -192,22 +182,14 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
         // Show End Form
                 function showEndForm() {
             // Check if any bunker is empty
-            fetch('/RiceMill/Dryer/CheckBunkerStatus', {
-                method: 'POST',
+
+               const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
+                const url = `/${tenant}/RiceMill/Dryer/CheckBunkerStatus`;
+            fetch(url, {
+             method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             })
             .then(response => response.json())
@@ -228,12 +210,6 @@
             });
         }
 
-
-     
-
-
-
-
         // Show Pause Form
         function showPauseForm() {
             document.getElementById("pauseReasonForm").style.display = "block";
@@ -252,10 +228,11 @@
             console.log("Pause Time:", pauseTime); // Log the pause time for debugging
             console.log("Resume Time:", resumeTime); // Log the pause time for debugging
              console.log("End Time:", unloadTime); // Log the pause time for debugging
+               const tenant = "@(Context.Session.GetString("Tenant"))"; // Retrieve tenant from session
             const urlMap = {
-                pause: '/RiceMill/Dryer/PauseDryer',
-                resume: '/RiceMill/Dryer/ResumeDryer',
-                end: '/RiceMill/Dryer/EndDryer',
+               pause: `/${tenant}/RiceMill/Dryer/PauseDryer`,
+               resume: `/${tenant}/RiceMill/Dryer/ResumeDryer`,
+                end: `/${tenant}/RiceMill/Dryer/EndDryer`,
             };
 
             // Initialize the body with batchId
@@ -287,7 +264,7 @@
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.success) {
-                        window.location.href = `/RiceMill/dryer/Dashboard?batchId=${batchId}`;
+                        window.location.href = `/${tenant}/RiceMill/Dryer/Dashboard?batchId=${batchId}`;
                     } else {
                         alert(data.message);
                     }

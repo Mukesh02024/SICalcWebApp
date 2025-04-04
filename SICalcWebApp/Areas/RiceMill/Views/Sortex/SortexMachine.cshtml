@@ -60,14 +60,53 @@
                     <label for="StartTime">Start Time:</label>
                     <input asp-for="StartTime" class="form-control" type="datetime-local" />
                     <span asp-validation-for="StartTime" class="text-danger"></span>
+
                 </div>
+
+          
 
                 
             </div>
+
+
+
+         
+
+
+
         </div>
-        <div class="text-center mt-3">
-            <button type="submit" class="btn btn-primary">Start Sortex Process</button>
+
+        <div class="row">
+                 <div class="col-md-6">
+
+                <label for="SaleType" class="form-label">Sale Type</label>
+                <select asp-for="SaleType" class="form-select">
+                    <option value="">-- Select Sale Type --</option>
+                    <option value="Freesale">FREESALE</option>
+                    <option value="CMR">CMR</option>
+                </select>
+                <span asp-validation-for="SaleType" class="text-danger"></span>
+                  </div>
+            <div class="col-md-6  mt-4">
+
+
+
+                <button type="submit" class="btn btn-primary">Start Sortex Process</button>
+
+            </div>
+
+
+
+
+
+
         </div>
+
+
+
+        
+            
+       
     </form>
 </div>
 

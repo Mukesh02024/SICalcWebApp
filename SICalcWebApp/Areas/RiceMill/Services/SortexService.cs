@@ -118,7 +118,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task EndProcessAsync(string batchId, DateTime? EndTime)
+        public async Task EndProcessAsync(string batchId, DateTime? EndTime,decimal Endweight)
         {
             var process = await _context.SortexProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
@@ -137,6 +137,9 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
                 // Update the end details after handling pause-related calculations
                 process.EndTime = EndTime;
+
+                process.EndWeight = Endweight;
+
                 process.ProcessStatus = "Completed";
 
                 _context.SortexProcesses.Update(process);
@@ -163,10 +166,16 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
         public async Task<List<string>> GetBatchIdsForSortexAsync(string sortexBunkerName)
         {
+            //var completedBatchIds = await _context.MillingProcesses
+            //    .Where(mp => mp.SortexBunkerName == sortexBunkerName && mp.ProcessStatus == "Completed")
+            //    .Select(mp => mp.BatchId)
+            //    .ToListAsync();
+
+
             var completedBatchIds = await _context.MillingProcesses
-                .Where(mp => mp.SortexBunkerName == sortexBunkerName && mp.ProcessStatus == "Completed")
-                .Select(mp => mp.BatchId)
-                .ToListAsync();
+    .Where(mp => mp.SortexBunkerName == sortexBunkerName)
+    .Select(mp => mp.BatchId)
+    .ToListAsync();
 
             var existingBatchIds = await _context.SortexProcesses
                 .Select(sp => sp.BatchId)
@@ -182,9 +191,6 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 .Select(sb => sb.SortexBName)
                 .ToListAsync();
         }
-
-
-
 
     }
 }

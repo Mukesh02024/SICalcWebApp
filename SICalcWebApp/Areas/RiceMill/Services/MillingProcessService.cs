@@ -36,6 +36,13 @@ namespace SICalcWebApp.Areas.RiceMill.Services
         public async Task StartMillProcessAsync(MillingProcess MillingProcess)
         {
             _context.MillingProcesses.Add(MillingProcess);
+            var bunker = await _context.SortexBunkers.FirstOrDefaultAsync(b => b.SortexBName == MillingProcess .SortexBunkerName);
+            if (bunker != null)
+            {
+                bunker.Status = "OCCUPIED"; // Mark the bunker as occupied
+                _context.SortexBunkers.Update(bunker); // Update the bunker status
+            }
+
             await _context.SaveChangesAsync();
         }
 
@@ -96,7 +103,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
 
 
-        public async Task EndProcessAsync(string batchId , string SortexBunker, DateTime? EndTime)
+        public async Task EndProcessAsync(string batchId ,  DateTime? EndTime)
         {
             var process = await _context.MillingProcesses.FirstOrDefaultAsync(p => p.BatchId == batchId);
             if (process != null)
@@ -116,17 +123,12 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
                 // Update the end details after handling pause-related calculations
                 process.EndTime = EndTime;
-                process.SortexBunkerName = SortexBunker;
+
+              
                 process.ProcessStatus = "Completed";
 
 
-                // Fetch the selected bunker and update its status to "OCCUPIED"
-                var bunker = await _context.SortexBunkers.FirstOrDefaultAsync(b => b.SortexBName == SortexBunker);
-                if (bunker != null)
-                {
-                    bunker.Status = "OCCUPIED"; // Mark the bunker as occupied
-                    _context.SortexBunkers.Update(bunker); // Update the bunker status
-                }
+           
 
                 _context.MillingProcesses.Update(process);
                 await _context.SaveChangesAsync();

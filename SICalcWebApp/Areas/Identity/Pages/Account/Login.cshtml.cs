@@ -86,35 +86,50 @@ namespace SICalcWebApp.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                ModelState.AddModelError(string.Empty, ErrorMessage);
-            }
 
-            returnUrl ??= Url.Content("~/");
-
-            // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            var tenant = HttpContext.Request.RouteValues["tenant"]?.ToString() ?? "Default";
+            _logger.LogInformation($"Resolved tenant in LoginModel: {tenant}");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ReturnUrl = returnUrl ?? Url.Page("/Index", new { tenant });
+            //if (!string.IsNullOrEmpty(ErrorMessage))
+            //{
+            //    ModelState.AddModelError(string.Empty, ErrorMessage);
+            //}
 
-            ReturnUrl = returnUrl;
+            //returnUrl ??= Url.Content("~/");
+
+            //// Clear the existing external cookie to ensure a clean login process
+            //await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            //ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            //// Handle tenant-specific logic here if needed
+            //var tenant = HttpContext.Request.RouteValues["tenant"]?.ToString();
+            //// Add logic to resolve tenant-specific configurations here if needed
+            //ReturnUrl = returnUrl;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
 
+            var tenant = HttpContext.Request.RouteValues["tenant"]?.ToString();
+            if (!string.IsNullOrEmpty(tenant))
+            {
+                returnUrl = $"/{tenant}{returnUrl}";
+            }
+
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    HttpContext.Session.SetString("Tenant", tenant);
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -133,8 +148,8 @@ namespace SICalcWebApp.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
+
     }
 }

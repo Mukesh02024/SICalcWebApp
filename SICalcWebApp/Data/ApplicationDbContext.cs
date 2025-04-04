@@ -1,20 +1,44 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using SICalcWebApp.Areas.RiceMill.Models;
+using SICalcWebApp.Areas.RiceMill.VM;
 using SICalcWebApp.Areas.SICalculator.Models;
 using SICalcWebApp.Models;
 
 
 namespace SICalcWebApp.Data
 {
-    public class ApplicationDbContext:IdentityDbContext
+    public class ApplicationDbContext: IdentityDbContext<IdentityUser, IdentityRole, string>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options):base(options)
-        {
-            this.Database.SetCommandTimeout(120);
+     
+            public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+                : base(options)
+            {
+            // Get the connection string from the relational options extension
+            var relationalOptions = options.Extensions
+                .OfType<Microsoft.EntityFrameworkCore.Infrastructure.RelationalOptionsExtension>()
+                .FirstOrDefault();
 
-        }
+            if (relationalOptions != null)
+            {
+                Console.WriteLine($"Using connection string: {relationalOptions.ConnectionString}");
+            }
+            else
+            {
+                Console.WriteLine("No connection string found.");
+            }
+
+
+            }
+
+          public DbSet<MillQuality>MillQualities { get; set; }
+        public DbSet<MillQualitySortex> MillQualitySortexes { get; set; }
+        public DbSet<BatchProcessReport> BatchProcessReports { get; set; }
+
+        public DbSet<BatchProcessReportArwaVM>BatchProcessReportArwaVMs { get; set; }
+
         public DbSet<FC> FCs { get; set; }
         public DbSet<TPDInfo> TPDInfos { get; set; }
         public DbSet<FCInfo> FCInfos { get; set; }
@@ -62,6 +86,21 @@ namespace SICalcWebApp.Data
 
             base.OnModelCreating(modelBuilder);
 
+
+            modelBuilder.Entity<MillQuality>()
+            .HasIndex(q => new { q.BatchID, q.Stage })
+            .IsUnique(); // Ensures one entry per BatchID per stage
+
+
+            modelBuilder.Entity<MillQualitySortex>()
+            .HasIndex(q => new { q.BatchID, q.Stage })
+            .IsUnique(); // Ensures one entry per BatchID per stage
+
+
+
+            modelBuilder.Entity<BatchProcessReport>().HasNoKey(); // Since it's a report, no primary
+                                                                  // 
+            modelBuilder.Entity<BatchProcessReportArwaVM>().HasNoKey(); // Since it's a report, no primary key
             modelBuilder.Entity<GroupMill>()
                .HasKey(g => g.GroupId);
 

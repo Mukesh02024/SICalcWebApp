@@ -22,20 +22,25 @@ namespace SICalcWebApp.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
         }
-
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            if (returnUrl != null)
+
+
+            var tenant = RouteData.Values["tenant"]?.ToString() ?? "Default";
+
+            // Construct the login page URL with the tenant
+            string loginPageUrl = Url.Page("/Account/Login", new { tenant });
+            if (!string.IsNullOrEmpty(returnUrl))
             {
                 return LocalRedirect(returnUrl);
             }
             else
             {
-                // This needs to be a redirect so that the browser performs a new
-                // request and the identity for the user gets updated.
-                return RedirectToPage();
+                // Redirect to the login page of the Default tenant
+                return Redirect(loginPageUrl);
             }
         }
     }

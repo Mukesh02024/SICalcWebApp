@@ -229,6 +229,116 @@ namespace SICalcWebApp.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.BatchProcessReport", b =>
+                {
+                    b.Property<string>("BatchId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("DryerDelay")
+                        .HasColumnType("float");
+
+                    b.Property<double>("DryerHandiTimeDifference")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("DryerLoadTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DryerStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("DryerTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("DryerUnloadBunk")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DryerUnloadTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("DuctiPressure")
+                        .HasColumnType("float");
+
+                    b.Property<double>("HandiDelay")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("HandiEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HandiStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HandiStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("HandiTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("HandiType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MillBunkerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("MillEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("MillStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("MillingDelay")
+                        .HasColumnType("float");
+
+                    b.Property<string>("MillingStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("MillingTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PaddyType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Pressure")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ProcessType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("SortexDelay")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("SortexEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SortexStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SortexStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("SortexTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SortexUnloadBunk")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SortexloadBunk")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("BatchProcessReports");
+                });
+
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.DryerProcess", b =>
                 {
                     b.Property<int>("DryerProcessId")
@@ -357,9 +467,6 @@ namespace SICalcWebApp.Migrations
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("HandiRunCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("HandiType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -367,6 +474,9 @@ namespace SICalcWebApp.Migrations
                     b.Property<string>("PaddyType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("PaddyWeight")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PauseReason")
                         .HasColumnType("nvarchar(max)");
@@ -395,14 +505,14 @@ namespace SICalcWebApp.Migrations
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<double?>("Temperature")
-                        .IsRequired()
-                        .HasColumnType("float");
-
                     b.Property<TimeSpan?>("TotalDelayTime")
                         .HasColumnType("time");
 
                     b.Property<string>("UnloadBunkerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WaterType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("HandiProcessId");
@@ -453,6 +563,9 @@ namespace SICalcWebApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BatchId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
 
@@ -501,6 +614,161 @@ namespace SICalcWebApp.Migrations
                     b.ToTable("MillItems");
                 });
 
+            modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.MillQuality", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("BatchID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Machine_Broken")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_Damage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_Discolour")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_FRK")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Machine_Moisture")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Manual_Broken")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_Damage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_Discolour")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_FRK")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Manual_Moisture")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Mill_Wightment")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Moisture_Chotti_Machine")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Moisture_Chotti_Machine_Manual")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Other1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Other2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Other3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar(2)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BatchID", "Stage")
+                        .IsUnique();
+
+                    b.ToTable("MillQualities");
+                });
+
+            modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.MillQualitySortex", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("BatchID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Machine_Broken")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_Damage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_Discolour")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Machine_FRK")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Machine_Moisture")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Manual_Broken")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_Damage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_Discolour")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Manual_FRK")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Manual_Moisture")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Min10Rejection")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Moisture_Chotti_Machine")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("Moisture_Chotti_Machine_Manual")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Other1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Other2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Other3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Sec30Final")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Stage")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("nvarchar(2)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BatchID", "Stage")
+                        .IsUnique();
+
+                    b.ToTable("MillQualitySortexes");
+                });
+
             modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.Models.MillingProcess", b =>
                 {
                     b.Property<int>("MillingProcessId")
@@ -531,6 +799,10 @@ namespace SICalcWebApp.Migrations
 
                     b.Property<DateTime?>("ResumeTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("SaleType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SortexBunkerName")
                         .HasColumnType("nvarchar(max)");
@@ -624,6 +896,9 @@ namespace SICalcWebApp.Migrations
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("EndWeight")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("PauseReason")
                         .HasColumnType("nvarchar(max)");
 
@@ -635,6 +910,10 @@ namespace SICalcWebApp.Migrations
 
                     b.Property<DateTime?>("ResumeTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("SaleType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SortexBunkerName")
                         .IsRequired()
@@ -688,6 +967,90 @@ namespace SICalcWebApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TypeOfHandis");
+                });
+
+            modelBuilder.Entity("SICalcWebApp.Areas.RiceMill.VM.BatchProcessReportArwaVM", b =>
+                {
+                    b.Property<string>("BatchId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("HandiDelay")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("HandiEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HandiStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HandiStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("HandiTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("HandiType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MillBunkerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("MillEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("MillStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("MillingDelay")
+                        .HasColumnType("float");
+
+                    b.Property<string>("MillingStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("MillingTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PaddyType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Pressure")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ProcessType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("SortexDelay")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("SortexEndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SortexStaff")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SortexStartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("SortexTakenTime")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SortexUnloadBunk")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SortexloadBunk")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("BatchProcessReportArwaVMs");
                 });
 
             modelBuilder.Entity("SICalcWebApp.Areas.SICalculator.Models.FC", b =>

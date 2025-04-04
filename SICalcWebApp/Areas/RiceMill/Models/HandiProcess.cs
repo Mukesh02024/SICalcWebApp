@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
 
 namespace SICalcWebApp.Areas.RiceMill.Models
 {
@@ -10,8 +11,8 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         public string PaddyType { get; set; }
         public string HandiType { get; set; }
 
-        [Required(ErrorMessage = "Temperature is required.")]
-        public double? Temperature { get; set; }
+        [Required(ErrorMessage = "WaterType is required.")]
+        public string WaterType{ get; set; }
 
         [Required(ErrorMessage = "Pressure is required.")]
         public double? Pressure { get; set; }
@@ -32,7 +33,10 @@ namespace SICalcWebApp.Areas.RiceMill.Models
              ? ResumeTime - PauseTime
              : null;
         // Handi Run Count (this will be the default to 8 if ProcessType is not "ARWA")
-        public int? HandiRunCount { get; set; }
+
+        [BindRequired]
+        [Range(0.1, double.MaxValue, ErrorMessage = "PaddyWeight must be at least 0.1.")]
+        public decimal? PaddyWeight { get; set; }
 
         // Unload Bunker Name (only visible if ProcessType is "ARWA")
         public string? UnloadBunkerName { get; set; }
