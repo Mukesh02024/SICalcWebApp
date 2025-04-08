@@ -126,9 +126,16 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
               
                 process.ProcessStatus = "Completed";
+                // ✅ Set the Mill Bunker to EMPTY after completion
+                var millBunker = await _context.MillBunkers.FirstOrDefaultAsync(b => b.MillBName == process.MillBunkerName);
+                if (millBunker != null)
+                {
+                    millBunker.Status = "EMPTY";
+                    millBunker.BatchId = null;
+                    _context.MillBunkers.Update(millBunker);
+                }
 
 
-           
 
                 _context.MillingProcesses.Update(process);
                 await _context.SaveChangesAsync();

@@ -61,7 +61,7 @@
 
         public List<RemainingStock> StockList { get; set; } = new List<RemainingStock>();
 
-
+        public List<BunkerStatusVM> MillBList { get; set; } = new List<BunkerStatusVM>();
 
     }
 

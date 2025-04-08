@@ -85,11 +85,11 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             // Start the milling process
             await _millingProcessService.StartMillProcessAsync(millingProcess);
 
-            // Mark the selected bunker as 'EMPTY'
+            //Mark the selected bunker as 'EMPTY'
             var bunker = await _millingProcessService.GetBunkerByNameAsync(model.MillBunkerName);
             if (bunker != null)
             {
-                bunker.Status = "EMPTY"; // Mark the bunker as empty after starting milling
+                bunker.Status = "In-Progress"; // Mark the bunker as empty after starting milling
                 await _millingProcessService.UpdateBunkerStatusAsync(bunker);
             }
 
@@ -186,6 +186,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             {
                 await _millingProcessService.EndProcessAsync(batchId,EndTime);
                 TempData["BatchId"] = batchId; // Retain this for redirection later if needed
+
                 return Json(new { success = true, message = "Process ended successfully" });
             }
             catch (Exception ex)

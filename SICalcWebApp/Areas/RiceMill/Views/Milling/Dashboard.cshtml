@@ -239,8 +239,8 @@
         }
 
         // Add unloadBunker if action is 'end' and unloadBunker is provided
-               if (action === 'end' && unloadBunker) {
-            body += `&SortexBunker=${encodeURIComponent(unloadBunker)}`; // Send unloadBunker as SortexBunker
+            if (action === 'end') {
+            // body += `&SortexBunker=${encodeURIComponent(unloadBunker)}`; // Send unloadBunker as SortexBunker
             body += `&endTime=${encodeURIComponent(endTime)}`;
         }
      

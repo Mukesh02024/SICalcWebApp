@@ -298,6 +298,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
 
             // Set the bunker status as 'Occupied'
             bunker.Status = "Occupied";
+            bunker.BatchId= batchId;
 
             // Save changes to the database for both tables
             _context.SaveChanges();

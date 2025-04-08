@@ -115,6 +115,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 // Update the end details after handling pause-related calculations
                 process.UnloadTime = UnloadTime;
                 process.UnloadBunkerName = UnloadBunkers;
+
                 process.ProcessStatus = "Completed";
 
                 // Fetch the selected bunker and update its status to "OCCUPIED"
@@ -122,6 +123,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                 if (bunker != null)
                 {
                     bunker.Status = "OCCUPIED"; // Mark the bunker as occupied
+                    bunker.BatchId=batchId;
                     _context.MillBunkers.Update(bunker); // Update the bunker status
                 }
 
