@@ -142,7 +142,9 @@ namespace SICalcWebApp.Areas.RiceMill.Services
                                 batches.Add(new BatchRemainingStages
                                 {
                                     BatchID = reader["BatchID"].ToString(),
-                                    RemainingStages = remainingStages
+                                    RemainingStages = remainingStages,
+                                    IsFRKEnabled = reader["IsFRK"] != DBNull.Value && Convert.ToBoolean(reader["IsFRK"])
+
                                 });
                             }
                         }
@@ -192,5 +194,7 @@ namespace SICalcWebApp.Areas.RiceMill.Services
     {
         public string BatchID { get; set; }
         public List<string> RemainingStages { get; set; }
+        public bool IsFRKEnabled { get; set; }  // Add this line
+
     }
 }

@@ -233,7 +233,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
             {
                 // Log the exception (optional)
                 Console.WriteLine(ex.Message);
-                return Json(new { success = false, message = "An error occurred while checking bunker status." });
+                return Json(new { success = false, message = "mmAn error occurred while checking bunker status." });
             }
         }
 

@@ -34,6 +34,8 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         public string SaleType { get; set; } // Dropdown from Master Data
         public TimeSpan? TotalDelayTime { get; set; }
 
+        public bool IsFRK { get; set; }
+
         // Computed property to calculate total delay time
         public TimeSpan? CalculatedDelayTime =>
              PauseTime.HasValue && ResumeTime.HasValue

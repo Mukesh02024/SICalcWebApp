@@ -66,8 +66,9 @@
         }
 
         .quality-table td {
-            padding: 8px;
+            padding: 4px;
             border: 1px solid #eef2f6;
+            text-align: center;
         }
 
     .batch-id {
@@ -218,16 +219,7 @@
                     <td>@Model.AvgMachineBroken</td>
                     <td>@Model.AvgManualBroken</td>
                 </tr>
-                <tr>
-                    <td>Moisture</td>
-                    <td>@Model.AvgMachineMoisture</td>
-                    <td>@Model.AvgManualMoisture</td>
-                </tr>
-                <tr>
-                    <td>Chhoti Moisture</td>
-                    <td>@Model.AvgMoistureChottiMachine</td>
-                    <td>@Model.AvgMoistureChottiMachineManual</td>
-                </tr>
+           
          
                 @if (Model.AvgMachineDamage > 0)
                 {
@@ -247,6 +239,18 @@
                         <td>Mill Weight</td>
                         <td colspan="2">@Model.AvgMillWeightment</td>
                     </tr>
+
+                    <tr>
+                        <td>Moisture</td>
+                        @*      <td>@Model.AvgMachineMoisture</td> *@
+                        <td colspan="2">@Model.AvgManualMoisture</td>
+                    </tr>
+                    <tr>
+                        <td>Chhoti Moisture</td>
+                        @*    <td>@Model.AvgMoistureChottiMachine</td> *@
+                        <td colspan="2">@Model.AvgMoistureChottiMachineManual</td>
+                    </tr>
+
                     <tr>
                         <td>Total Tested</td>
                         <td colspan="2"><span class="status">@Model.QualityStageCount</span></td>
@@ -278,8 +282,12 @@
     </div>
    
     <!-- Sortex  Quality Table -->
-    <div class="machine-card">
+    @{
+        var batchId = Model.SortexBatchId?.ToUpper() ?? "";
+        var isArwaBatch = batchId.Contains("ARWA");
+    }
 
+    <div class="machine-card">
         @if (Model.QualityStageSortexCount > 0)
         {
             <h5 class="machine-title">Sortex Quality @Model.SortexBatchId </h5>
@@ -297,21 +305,8 @@
                         <td>@Model.AvgSortexMachineBroken</td>
                         <td>@Model.AvgSortexManualBroken</td>
                     </tr>
-                    <tr>
-                        <td>Moisture</td>
-                        <td>@Model.AvgSortexMachineMoisture</td>
-                        <td>@Model.AvgSortexManualMoisture</td>
-                    </tr>
-                    <tr>
-                        <td>Chhoti Moisture</td>
-                        <td>@Model.AvgSortexMoistureChottiMachine</td>
-                        <td>@Model.AvgSortexMoistureChottiMachineManual</td>
-                    </tr>
-                    <tr>
-                        <td>Total Tested</td>
-                        <td colspan="2"><span class="status">@Model.QualityStageSortexCount</span></td>
-                    </tr>
-                    @if (Model.AvgSortexMachineDamage > 0)
+
+                    @if (!isArwaBatch)
                     {
                         <tr>
                             <td>Damage</td>
@@ -332,12 +327,26 @@
                             <td colspan="2">@Model.Avg10minutes</td>
                         </tr>
                     }
+
+                    <tr>
+                        <td>Moisture</td>
+                        <td colspan="2">@Model.AvgSortexManualMoisture</td>
+                    </tr>
+
+                    <tr>
+                        <td>Chhoti Moisture</td>
+                        <td colspan="2">@Model.AvgSortexMoistureChottiMachineManual</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total Tested</td>
+                        <td colspan="2"><span class="status">@Model.QualityStageSortexCount</span></td>
+                    </tr>
                 </tbody>
             </table>
         }
+    </div>
 
-
-     </div>
-
+    
 
 </div>

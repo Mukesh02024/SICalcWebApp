@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SICalcWebApp.Data;
 
@@ -11,9 +12,11 @@ using SICalcWebApp.Data;
 namespace SICalcWebApp.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250408124355_NullableWatertype")]
+    partial class NullableWatertype
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -899,9 +902,6 @@ namespace SICalcWebApp.Migrations
 
                     b.Property<decimal?>("EndWeight")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<bool>("IsFRK")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PauseReason")
                         .HasColumnType("nvarchar(max)");

@@ -43,10 +43,10 @@
 
                 <div class="row mb-3">
                     <!-- Paddy Type -->
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label asp-for="PaddyType">Paddy Type</label>
                         <select asp-for="PaddyType" class="form-control">
-                            <option value="">-- Select Paddy Type --</option>
+                            <option value="">--Paddy Type--</option>
                             @foreach (var paddyType in ViewBag.PaddyTypes as List<string>)
                             {
                                 <option value="@paddyType">@paddyType</option>
@@ -56,10 +56,10 @@
                     </div>
 
                     <!-- Handi Type -->
-                    <div class="col-md-6">
+                    <div class="col-md-4" id="handiTypeDiv">
                         <label asp-for="HandiType">Handi Type</label>
-                        <select asp-for="HandiType" class="form-control">
-                            <option value="">-- Select Handi Type --</option>
+                        <select asp-for="HandiType" id="HandiTypes" class="form-control">
+                            <option value="">--Handi Type--</option>
                             @foreach (var handiType in ViewBag.HandiTypes as List<string>)
                             {
                                 <option value="@handiType">@handiType</option>
@@ -67,15 +67,29 @@
                         </select>
                         <span asp-validation-for="HandiType" class="text-danger"></span>
                     </div>
+
+                    <!-- Handi Type -->
+                    <div class="col-md-4">
+                        <label asp-for="PaddyMoisture">Paddy Moisture</label>
+                        <input asp-for="PaddyMoisture" class="form-control" type="number"  placeholder="Paddy Moisture" />
+                        <span asp-validation-for="PaddyMoisture" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="StartTime">Start-Time</label>
+                        <input asp-for="StartTime" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="StartTime" class="text-danger"></span>
+                    </div>
+
                 </div>
 
-                <div class="row mb-3">
+                <div class="row mb-3" id="waterTypeDiv">
                     <!-- Water  -->
                     <div class="col-md-4">
                         <label asp-for="WaterType">WaterType</label>
                         @* <input asp-for="WaterType" class="form-control" type="text" placeholder="Enter Watertype" /> *@
 
-                        <select asp-for="WaterType" class="form-control">
+                        <select asp-for="WaterType" id="WaterTypes" class="form-control">
                             <option value="">-- Select Water Type --</option>
                             @foreach (var waterType in ViewBag.WaterTypes as List<string>)
                             {
@@ -86,29 +100,25 @@
                     </div>
 
                     <!-- Pressure -->
-                    <div class="col-md-4">
+                    <div class="col-md-4" id="pressureDiv">
                         <label asp-for="Pressure">Pressure</label>
-                        <input asp-for="Pressure" class="form-control" type="number" placeholder="Enter Pressure" />
+                        <input asp-for="Pressure" class="form-control" type="number" id="Pressures" placeholder="Enter Pressure" />
                         <span asp-validation-for="Pressure" class="text-danger"></span>
                     </div>
 
-              
-
-
-                    <div class="col-md-4">
-                        <label asp-for="StartTime">Start-Time</label>
-                        <input asp-for="StartTime" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="StartTime" class="text-danger"></span>
-                    </div>
+                
 
 
                 </div>
-                <!-- Number of Handi Run (conditionally visible) -->
+        
+
+
                 <div class="form-group" id="handiRunField" style="display: none;">
-              @*       <div class="form-group" id="handiRunField"> *@
                     <label for="PaddyWeight">PaddyWeight </label>
                     <input type="number" id="HandiRunCount" name="PaddyWeight" class="form-control" />
                     <span asp-validation-for="PaddyWeight" class="text-danger"></span>
+
+
                 </div>
 
 
@@ -125,58 +135,51 @@
 
 @section Scripts {
 
-   
     <script>
-               
-
-
         document.addEventListener("DOMContentLoaded", function () {
-                  // Automatically set current date and time in local format
-                  const now = new Date();
-                  const formattedDateTime = now.getFullYear() + '-' +
-                      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-                      String(now.getDate()).padStart(2, '0') + 'T' +
-                      String(now.getHours()).padStart(2, '0') + ':' +
-                      String(now.getMinutes()).padStart(2, '0');
+            // Set current datetime
+            const now = new Date();
+            const formattedDateTime = now.toISOString().slice(0, 16);
+            document.querySelectorAll('input[type="datetime-local"]').forEach(field => {
+                field.value = formattedDateTime;
+                field.max = formattedDateTime;
+                field.addEventListener("change", () => field.blur());
+            });
 
-                  const datetimeFields = document.querySelectorAll('input[type="datetime-local"]');
-                  datetimeFields.forEach((field) => {
-                      field.value = formattedDateTime;  // Set default to current date and time
-                      field.max = formattedDateTime;   // Restrict future date selection
-                      field.addEventListener("change", function () {
-                          field.blur(); // Remove focus to close the picker
-                      });
-                  });
-              });
+            const processTypeSelect = document.getElementById("processTypeSelect");
+            const handiRunField = document.getElementById("handiRunField");
+            const handiRunInput = document.getElementById("HandiRunCount");
 
+            // Use class or id of the parent divs
+            const waterTypeDiv = document.querySelector("#waterTypeDiv");
+            const handiTypeDiv = document.querySelector("#handiTypeDiv");
+            const pressureDiv = document.querySelector("#pressureDiv");
 
-        // JavaScript to show/hide "Number of Handi Run" field based on selected Process Type
-        document.getElementById("processTypeSelect").addEventListener("change", function () {
-            var processType = this.value;
-            var handiRunField = document.getElementById("handiRunField");
+       
+                    function toggleFields() {
+            const processType = processTypeSelect.value;
 
-                var handiRunInput = document.getElementById("HandiRunCount");
+            const isUsna = processType === "USNA";
 
+            // Show/Hide Fields
+            handiRunField.style.display = isUsna || processType === "ARWA" ? "block" : "none";
+            waterTypeDiv.style.display = isUsna ? "" : "none";
+            handiTypeDiv.style.display = isUsna ? "" : "none";
+            pressureDiv.style.display = isUsna ? "" : "none";
 
-            // Show the field if ARWA is selected, else hide it
-            if (processType === "ARWA") {
-                handiRunField.style.display = "block";
-                    handiRunInput.setAttribute("required", "required"); // Enforce required field
-            } else if(processType === "USNA") {
-                handiRunField.style.display = "block";
-                    handiRunInput.setAttribute("required", "required"); // Enforce required field
-            }
-            else{
-                handiRunField.style.display = "none";
-                handiRunInput.removeAttribute("required"); // Remove validation if hidden
-            }
+            // Set/Remove 'required' attributes
+            handiRunInput.required = isUsna || processType === "ARWA";
+            document.getElementById("WaterTypes").required = isUsna;
+            document.getElementById("HandiTypes").required = isUsna;
+            document.getElementById("Pressures").required = isUsna;
+        }
+
+            processTypeSelect.addEventListener("change", toggleFields);
+            toggleFields(); // run on load
         });
 
-        // Trigger change event on page load to set the initial state
-        document.getElementById("processTypeSelect").dispatchEvent(new Event("change"));
+
     </script>
-
-
 
 
     @{

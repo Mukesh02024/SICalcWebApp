@@ -79,14 +79,26 @@
         <div class="row">
                  <div class="col-md-6">
 
-                <label for="SaleType" class="form-label">Sale Type</label>
-                <select asp-for="SaleType" class="form-select">
-                    <option value="">-- Select Sale Type --</option>
-                    <option value="Freesale">FREESALE</option>
-                    <option value="CMR">CMR</option>
-                </select>
+                    <label for="SaleType" class="form-label">Sale Type</label>
+                    <select id="SaleType" name="SaleType" class="form-control" onchange="toggleFrkCheckbox(this.value)">
+
+               @*       <select asp-for="SaleType" class="form-select"> *@
+                         <option value="">-- Select Sale Type --</option>
+                         <option value="Freesale">FREESALE</option>
+                         <option value="CMR">CMR</option>
+                    </select>
                 <span asp-validation-for="SaleType" class="text-danger"></span>
-                  </div>
+                  
+                 </div>
+            <!-- Show only when SaleType is 'CMR' -->
+            <div class="form-group mt-2" id="frkCheckboxContainer" style="display: none;">
+                <!-- Bind directly to your model -->
+                <input asp-for="IsFRK" class="form-check-input" />
+                <!-- This hidden field ensures 'false' is submitted if unchecked -->
+                <input type="hidden" name="IsFRK" value="false" />
+                <label class="form-check-label" asp-for="IsFRK">Check FRK</label>
+            </div>
+
             <div class="col-md-6  mt-4">
 
 
@@ -173,6 +185,25 @@
             }
         });
     });
+
+
+
+      function toggleFrkCheckbox(saleType) {
+        const frkDiv = document.getElementById("frkCheckboxContainer");
+        if (saleType === "CMR") {
+            frkDiv.style.display = "block";
+        } else {
+            frkDiv.style.display = "none";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const selectedSaleType = document.getElementById("SaleType").value;
+        toggleFrkCheckbox(selectedSaleType);
+    });
+
+
+
 </script>
 <style>
     .form-container {

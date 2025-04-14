@@ -42,13 +42,13 @@ namespace SICalcWebApp.Areas.RiceMill.Models
         public decimal? Manual_FRK { get; set; }
 
         [Column(TypeName = "decimal(5,2)")]
-        public decimal Machine_Moisture { get; set; }
+        public decimal? Machine_Moisture { get; set; }
 
         [Column(TypeName = "decimal(5,2)")]
         public decimal Manual_Moisture { get; set; }
 
         [Column(TypeName = "decimal(5,2)")]
-        public decimal Moisture_Chotti_Machine { get; set; }
+        public decimal? Moisture_Chotti_Machine { get; set; }
 
 
         [Column(TypeName = "decimal(5,2)")]

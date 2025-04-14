@@ -62,6 +62,8 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                     Console.WriteLine(error.ErrorMessage);
                 }
 
+
+
                 // Reload dropdowns in case of error
                 var masterData = await _machineProcessService.GetMasterDataAsync();
                 ViewBag.ProcessTypes = masterData.ProcessTypes;
@@ -71,6 +73,7 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
 
                 return View(model);
             }
+        
 
             var ongoingProcess = await _machineProcessService.GetActiveProcessAsync();
             if (ongoingProcess != null && (ongoingProcess.ProcessStatus == "In Progress" || ongoingProcess.ProcessStatus == "Paused"))
@@ -101,7 +104,8 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 StaffName = model.StaffName,
                 StartTime = model.StartTime,
                 PaddyWeight=model.PaddyWeight,
-                ProcessStatus = "In Progress"
+                ProcessStatus = "In Progress",
+                PaddyMoisture = model.PaddyMoisture,
             };
 
             // Save Handi Process

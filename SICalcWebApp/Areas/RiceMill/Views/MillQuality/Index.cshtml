@@ -1,4 +1,4 @@
-﻿@model List<SICalcWebApp.Areas.RiceMill.Services.BatchRemainingStages>
+﻿    @model List<SICalcWebApp.Areas.RiceMill.Services.BatchRemainingStages>
 
 @{
     ViewData["Title"] = "Quality Batch Processing";
@@ -9,6 +9,10 @@
         width: 80px !important;
         padding: 2px 5px;
         font-size: 14px;
+    }
+
+    .hidden-field {
+        display: none;
     }
 </style>
 <h2>Quality Report During Milling Process</h2>
@@ -55,23 +59,32 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Manual Values</h5>
-                            <div class="mb-1"><label>Damage:</label><input type="number" step="0.01" class="form-control" name="Manual_Damage" required></div>
-                            <div class="mb-1"><label>Discolour:</label><input type="number" step="0.01" class="form-control" name="Manual_Discolour" required></div>
+                            <div class="mb-1 damage-field"><label>Damage:</label><input type="number" step="0.01" class="form-control" name="Manual_Damage" required></div>
+                            <div class="mb-1 discolour-field"><label>Discolour:</label><input type="number" step="0.01" class="form-control" name="Manual_Discolour" required></div>
                             <div class="mb-1"><label>Broken:</label><input type="number" step="0.01" class="form-control" name="Manual_Broken" required></div>
-                            <div class="mb-1"><label>FRK:</label><input type="number" step="0.01" class="form-control" name="Manual_FRK" required></div>
-                            <div class="mb-1"><label>Moisture:</label><input type="number" step="0.01" class="form-control" name="Manual_Moisture" required></div>
-                            <div class="mb-1"><label>Chotti_Machine:</label><input type="number" step="0.01" class="form-control" name="Moisture_Chotti_Machine_Manual" required></div>
+                        @*     <div class="mb-1"><label>FRK:</label><input type="number" step="0.01" class="form-control" name="Manual_FRK" required></div> *@
+                        
+                            <div class="mb-1"></div>
                         </div>
                         <div class="col-md-6">
                             <h5>Machine Values</h5>
-                            <div class="mb-1"><label>Damage:</label><input type="number" step="0.01" class="form-control" name="Machine_Damage" required></div>
-                            <div class="mb-1"><label>Discolour:</label><input type="number" step="0.01" class="form-control" name="Machine_Discolour" required></div>
+                            <div class="mb-1 damage-field"><label>Damage:</label><input type="number" step="0.01" class="form-control" name="Machine_Damage" required></div>
+                            <div class="mb-1 discolour-field"><label>Discolour:</label><input type="number" step="0.01" class="form-control" name="Machine_Discolour" required></div>
                             <div class="mb-1"><label>Broken:</label><input type="number" step="0.01" class="form-control" name="Machine_Broken" required></div>
-                            <div class="mb-1"><label>FRK:</label><input type="number" step="0.01" class="form-control" name="Machine_FRK" required></div>
-                            <div class="mb-1"><label>Moisture:</label><input type="number" step="0.01" class="form-control" name="Machine_Moisture" required></div>
-                            <div class="mb-1"><label>Chotti_Machine:</label><input type="number" step="0.01" class="form-control" name="Moisture_Chotti_Machine" required></div>
+                            @* <div class="mb-1"><label>FRK:</label><input type="number" step="0.01" class="form-control" name="Machine_FRK" required></div> *@
+                           @*  <div class="mb-1"><label>Moisture:</label><input type="number" step="0.01" class="form-control" name="Machine_Moisture" required></div>
+                            <div class="mb-1"><label>Chotti_Machine:</label><input type="number" step="0.01" class="form-control" name="Moisture_Chotti_Machine" required></div> *@
                         </div>
                     </div>
+                    <div class="row">
+                        <label>Chotti_Machine:</label><input type="number" step="0.01" class="form-control" name="Moisture_Chotti_Machine_Manual" required>
+                    </div>
+                    <div class="row">
+                        <label>Moisture:</label><input type="number" step="0.01" class="form-control" name="Manual_Moisture" required>
+                    </div>
+
+
+
                     <div class="row">
                         <label>Mill_Wightment:</label>
                         <input type="number" step="0.01" class="form-control" name="Mill_Wightment" required>
@@ -99,9 +112,25 @@
                 var batchID = $(this).data("batch");
                 var stage = $(this).data("stage");
 
-                $('#qualityForm')[0].reset(); // Clear previous form inputs
+                $('#qualityForm')[0].reset();
                 $('#batchId').val(batchID);
                 $('#stage').val(stage);
+
+                // Toggle Damage and Discolour fields based on batch ID
+                const isARWA = batchID.includes('ARWA');
+
+                // Function to toggle field visibility and requirements
+                const toggleField = (selector, show) => {
+                    const field = $(selector);
+                    const input = field.find('input');
+                    field.toggle(show);
+                    input.prop('required', show);
+                };
+
+                // Toggle all Damage and Discolour fields
+                toggleField('.damage-field', !isARWA);
+                toggleField('.discolour-field', !isARWA);
+
                 $('#qualityModal').modal('show');
             });
 
@@ -115,12 +144,12 @@
                         alert("Quality data submitted successfully!");
                         $('#qualityModal').modal('hide');
 
-                        var batchID = $('#batchId').val();
-                        var stage = $('#stage').val();
-                        $('#batch-' + batchID + ' button[data-stage="' + stage + '"]').remove();
+                        const batchID = $('#batchId').val();
+                        const stage = $('#stage').val();
+                        $(`#batch-${batchID} button[data-stage="${stage}"]`).remove();
 
-                        if ($('#batch-' + batchID + ' button').length === 0) {
-                            $('#batchList option[value="' + batchID + '"]').remove();
+                        if ($(`#batch-${batchID} button`).length === 0) {
+                            $(`#batchList option[value="${batchID}"]`).remove();
                         }
                     },
                     error: function () {

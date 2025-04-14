@@ -86,6 +86,8 @@ namespace SICalcWebApp.Areas.RiceMill.Controllers
                 SortexBunkerName = model.SortexBunkerName,
                 StartTime = model.StartTime,
                 SaleType= model.SaleType,
+                IsFRK = model.IsFRK, // ✅ Add this line to capture the checkbox value
+
                 ProcessStatus = "In Progress"
             };
 
